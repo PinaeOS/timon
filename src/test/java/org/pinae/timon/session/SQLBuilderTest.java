@@ -1,0 +1,128 @@
+package org.pinae.timon.session;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Before;
+import org.junit.Test;
+
+
+public class SQLBuilderTest {
+	
+	private SQLBuilder builder;
+	
+	@Before
+	public void before() {
+		try {
+			this.builder = new SQLBuilder();
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	@Test
+	public void testGetSQLByName() {
+		String sql = builder.getSQLByName("GET_ID");
+		assertEquals(sql, "select id from test");
+	}
+	
+	@Test
+	public void testGetSQLByNameWithParameters1() {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("id", 20);
+		String sql = builder.getSQLByNameWithParameters("GET_SQL1", parameters);
+		assertEquals(sql, "select * from test where 1=1 and id = 20");
+	}
+	
+	@Test
+	public void testGetSQLByNameWithParameters2() {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("id", 20);
+		String sql = builder.getSQLByNameWithParameters("GET_SQL2", parameters);
+		assertEquals(sql, "select * from test where 1=1 and id = 20 order by id");
+		
+		parameters.put("name", "Hui");
+		sql = builder.getSQLByNameWithParameters("GET_SQL2", parameters);
+		assertEquals(sql, "select * from test where 1=1 and id = 20 and name = 'Hui' order by id");
+	}
+	
+	@Test
+	public void testGetSQLByNameWithObject() {
+
+		User user = new User();
+		user.setId(3);
+		user.setName("Joe");
+		user.setAge(20);
+		user.setPhone("13391562775");
+		
+		String sql = builder.getSQLByNameWithParameters("INSERT_DATA", user);
+		assertEquals(sql, "insert into test(id, name, age, phone) values (3, 'Joe', 20, '13391562775')");
+	}
+	
+	@Test
+	public void testGetSQLByNameWithSubSQL() {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("id", 20);
+		String sql = builder.getSQLByNameWithParameters("SQL_REF_TEST", parameters);
+		assertEquals(sql, "select name from (select name from (select name from USER1 where id = 20) t1 union select name from (select name from USER2 order by id) t2) t order by id");
+	}
+	
+	@Test
+	public void testGetLimitSQLForOracle() {
+		String sql = builder.getSQLByName("GET_ID");
+		sql = SQLBuilder.getLimitSQL(sql, 10, 10, "oracle");
+		assertEquals(sql, "select * from ( select row_.*, rownum rownum_ from ( select id from test ) row_ where rownum <= 20) where rownum_ > 10");
+	}
+	
+	@Test
+	public void testGetLimitSQLForMySQL() {
+		String sql = builder.getSQLByName("GET_ID");
+		sql = SQLBuilder.getLimitSQL(sql, 10, 10, "mysql");
+		assertEquals(sql, "select * from ( select id from test ) t limit 10, 10");
+	}
+	
+	@Test
+	public void testGetCountSQL() {
+		String sql = builder.getSQLByName("GET_ID");
+		sql = SQLBuilder.getCountSQL(sql);
+		assertEquals(sql, "select count(*) from ( select id from test ) t");
+	}
+	
+	private class User {
+		private int id;
+		private String name;
+		private int age;
+		private String phone;
+		
+		public int getId() {
+			return id;
+		}
+		public void setId(int id) {
+			this.id = id;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+		public int getAge() {
+			return age;
+		}
+		public void setAge(int age) {
+			this.age = age;
+		}
+		public String getPhone() {
+			return phone;
+		}
+		public void setPhone(String phone) {
+			this.phone = phone;
+		}
+		
+		
+	}
+}

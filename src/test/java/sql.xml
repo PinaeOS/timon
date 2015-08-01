@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespaces="">
+
+	<import file="sql/sql_parse_test.xml"/>
+	
+	<sql name="GET_ID">
+		select id from test
+	</sql>
+	
+	<sql name="GET_SQL1">
+		select * from test where 1=1 
+		<choose when="id">
+			and id = :id
+		</choose>
+	</sql>
+	
+	<sql name="GET_SQL2">
+		select * from test where 1=1 {id} {name} {order}
+		<choose when="id" statement="id">
+			and id = :id
+		</choose>
+		<choose when="name">
+			and name = :name
+		</choose>
+		<choose when="id" statement="order">
+			order by id
+		</choose>
+	</sql>
+	
+	<sql name="SUB_SQL1">
+		select name from USER1
+		<choose when="id">
+			where id = :id
+		</choose>
+	</sql>
+	
+	<sql name="SUB_SQL2">
+		select name from USER2 {order}
+		<choose when="id" statement="order">
+			order by id
+		</choose>
+	</sql>
+	
+	<sql name="SUB_SQL3">
+		select name from (${SUB_SQL1}) t1 union select name from (${SUB_SQL2}) t2
+	</sql>
+	
+	<sql name="SQL_REF_TEST">
+		select name from (${SUB_SQL3}) t {order}
+		<choose when="id" statement="order">
+			order by id
+		</choose>
+	</sql>
+	
+	<sql name="INSERT_DATA">
+		insert into test(id, name, age, phone) values (:id, :name, :age, :phone)
+	</sql>
+	
+</mapper>
