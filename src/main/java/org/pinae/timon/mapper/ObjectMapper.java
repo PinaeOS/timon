@@ -4,45 +4,48 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ObjectMapper {
-	/**
-	 * 将查询结果映射成为List<对象>
-	 * 
-	 * @param table 查询结果
-	 * @param columns 列名
-	 * @param clazz 映射的类名称
-	 * 
-	 * @return 映射后的List<对象>
-	 */
-	public List<?> toObjectList(List<Object[]> table, String[] columns, Class<?> clazz) {
+import org.apache.log4j.Logger;
 
-		List<Object> resultList = new ArrayList<Object>();
-		if ((table != null && columns != null) && table.size() > 0) {
+public class ObjectMapper implements Mapper {
+	
+	private static Logger log = Logger.getLogger(ObjectMapper.class);
+	
+	private Class<?> clazz;
+	
+	public ObjectMapper(Class<?> clazz) {
+		this.clazz = clazz;
+	}
+	
+	public List<?> toList(List<Object[]> dataList, String[] columns) {
 
-			for (Object[] row : table) {
-				Object object = null;
-				try {
-					object = clazz.newInstance();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				for (int i = 0; i < columns.length; i++) {
-
-					String columnName = (String) columns[i];
-					try {
-						Field field = clazz.getDeclaredField(columnName);
-						field.setAccessible(true);
-						field.set(object, row[i]);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-
-				resultList.add(object);
+		List<Object> table = new ArrayList<Object>();
+		
+		if ((dataList != null && columns != null) && dataList.size() > 0) {
+			for (Object[] row : dataList) {
+				Object object = toObject(row, columns);
+				table.add(object);
 			}
-
 		}
-		return resultList;
+		return table;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T toObject(Object[] row, String[] columns) {
+		Object object = null;
+		try {
+			object = clazz.newInstance();
+			
+			for (int i = 0; i < columns.length; i++) {
+				String columnName = (String) columns[i];
+
+				Field field = clazz.getDeclaredField(columnName);
+				field.setAccessible(true);
+				field.set(object, row[i]);
+			}
+		} catch (Exception e) {
+			log.error(String.format("ObjectMapper Exception: exception=%s", e.getMessage()));
+		}
+
+		return (T) object;
 	}
 }

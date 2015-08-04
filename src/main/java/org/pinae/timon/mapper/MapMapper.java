@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author huiyugeng
  *
  */
-public class MapMapper {
+public class MapMapper implements Mapper {
 
 	/**
 	 * 将查询结果映射成为List<Map>
@@ -24,7 +24,7 @@ public class MapMapper {
 	 * 
 	 * @return 映射后的List<Map>
 	 */
-	public List<Map<String, Object>> toMapList(List<Object[]> table, String[] columns) {
+	public List<Map<String, Object>> toList(List<Object[]> table, String[] columns) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		if ((table != null && columns != null) && table.size() > 0) {
 			for (Object[] row : table) {
@@ -47,8 +47,8 @@ public class MapMapper {
 	 * 
 	 * @return 映射后的List<Map>
 	 */
-	public List<Map<String, Object>> toMapList(List<Object[]> table, String[] columns, Map<String, Object> defaultMap) {
-		List<Map<String, Object>> resultList = toMapList(table, columns);
+	public List<Map<String, Object>> toList(List<Object[]> table, String[] columns, Map<String, Object> defaultMap) {
+		List<Map<String, Object>> resultList = toList(table, columns);
 
 		for (Map<String, Object> resultItem : resultList) {
 			Set<String> keySet = defaultMap.keySet();
@@ -66,6 +66,14 @@ public class MapMapper {
 		}
 
 		return resultList;
+	}
+
+	public <T> T toObject(Object[] row, String[] columns) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		for (int i = 0; i < columns.length; i++) {
+			result.put(columns[i], row[i]);
+		}
+		return (T)result;
 	}
 
 }
