@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pinae.timon.mapper.MapMapper;
-import org.pinae.timon.session.SQLMetaData;
+import org.pinae.timon.session.SQLMetadata;
 import org.pinae.timon.session.SQLSession;
 
 /**
@@ -19,9 +19,9 @@ import org.pinae.timon.session.SQLSession;
 public class SampleDataLoader {
 	
 	private SQLSession session = null;
-	private SQLMetaData metadata = null;
+	private SQLMetadata metadata = null;
 	
-	public SampleDataLoader(SQLSession session, SQLMetaData metadata) {
+	public SampleDataLoader(SQLSession session, SQLMetadata metadata) {
 		this.session = session;
 		this.metadata = metadata;
 	}
@@ -50,14 +50,14 @@ public class SampleDataLoader {
 	 * 
 	 * @return 样本数据列表
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Map<String, Object>> loadSampleDataBySql(String sql) {
 
 		List<Map<String, Object>> result = null;
 		
 		if (session != null && metadata != null) {
 			String columns[] = metadata.getColumnsBySQL(sql);
-			List<Object[]> table = session.select(sql);
-			result = new MapMapper().toMapList(table, columns);
+			result = (List<Map<String, Object>>)session.select(sql, columns, Map.class);
 		}
 		
 		session.close();
