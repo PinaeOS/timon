@@ -5,18 +5,18 @@
 	<import file="sql/sql_parse_test.xml"/>
 	
 	<sql name="GET_ID">
-		select id from test
+		select id from person
 	</sql>
 	
-	<sql name="GET_SQL1">
-		select * from test where 1=1 
+	<sql name="GET_PERSON_1">
+		select * from person where 1=1 
 		<choose when="id">
 			and id = :id
 		</choose>
 	</sql>
 	
-	<sql name="GET_SQL2">
-		select * from test where 1=1 {id} {name} {order}
+	<sql name="GET_PERSON_2">
+		select * from person where 1=1 {id} {name} {order}
 		<choose when="id" statement="id">
 			and id = :id
 		</choose>
@@ -53,7 +53,7 @@
 		</choose>
 	</sql>
 	
-	<sql name="INSERT_DATA">
+	<sql name="INSERT_PERSON">
 		insert into test(id, name, age, phone) values (:id, :name, :age, :phone)
 	</sql>
 	

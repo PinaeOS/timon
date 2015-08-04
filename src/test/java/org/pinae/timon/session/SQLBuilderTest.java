@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pinae.timon.session.pojo.Person;
 
 
 public class SQLBuilderTest {
@@ -34,7 +35,7 @@ public class SQLBuilderTest {
 	public void testGetSQLByNameWithParameters1() {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
-		String sql = builder.getSQLByNameWithParameters("GET_SQL1", parameters);
+		String sql = builder.getSQLByNameWithParameters("GET_PERSON_1", parameters);
 		assertEquals(sql, "select * from test where 1=1 and id = 20");
 	}
 	
@@ -42,24 +43,24 @@ public class SQLBuilderTest {
 	public void testGetSQLByNameWithParameters2() {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
-		String sql = builder.getSQLByNameWithParameters("GET_SQL2", parameters);
+		String sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
 		assertEquals(sql, "select * from test where 1=1 and id = 20 order by id");
 		
 		parameters.put("name", "Hui");
-		sql = builder.getSQLByNameWithParameters("GET_SQL2", parameters);
+		sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
 		assertEquals(sql, "select * from test where 1=1 and id = 20 and name = 'Hui' order by id");
 	}
 	
 	@Test
 	public void testGetSQLByNameWithObject() {
 
-		User user = new User();
-		user.setId(3);
-		user.setName("Joe");
-		user.setAge(20);
-		user.setPhone("13391562775");
+		Person person = new Person();
+		person.setId(3);
+		person.setName("Joe");
+		person.setAge(20);
+		person.setPhone("13391562775");
 		
-		String sql = builder.getSQLByNameWithParameters("INSERT_DATA", user);
+		String sql = builder.getSQLByNameWithParameters("INSERT_PERSON", person);
 		assertEquals(sql, "insert into test(id, name, age, phone) values (3, 'Joe', 20, '13391562775')");
 	}
 	
@@ -92,37 +93,4 @@ public class SQLBuilderTest {
 		assertEquals(sql, "select count(*) from ( select id from test ) t");
 	}
 	
-	private class User {
-		private int id;
-		private String name;
-		private int age;
-		private String phone;
-		
-		public int getId() {
-			return id;
-		}
-		public void setId(int id) {
-			this.id = id;
-		}
-		public String getName() {
-			return name;
-		}
-		public void setName(String name) {
-			this.name = name;
-		}
-		public int getAge() {
-			return age;
-		}
-		public void setAge(int age) {
-			this.age = age;
-		}
-		public String getPhone() {
-			return phone;
-		}
-		public void setPhone(String phone) {
-			this.phone = phone;
-		}
-		
-		
-	}
 }

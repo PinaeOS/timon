@@ -41,7 +41,7 @@ public class SQLParserTest {
 				assertEquals(tableSet.size(), 3);
 			}
 		} catch (JSQLParserException e) {
-			e.printStackTrace();
+			fail(e.getMessage());
 		}
 	}
 }
