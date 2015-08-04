@@ -15,6 +15,12 @@ import org.pinae.timon.session.datasource.JDBCConnection;
 import org.pinae.timon.util.ClassLoaderUtils;
 import org.pinae.timon.util.ConfigMap;
 
+/**
+ * 数据库会话工厂
+ * 
+ * @author Huiyugeng
+ *
+ */
 public class SQLSessionFactory {
 	
 	private static Logger logger = Logger.getLogger(SQLSessionFactory.class);

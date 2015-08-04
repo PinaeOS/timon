@@ -12,9 +12,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.pinae.timon.mapper.AnnotationMapper;
 import org.pinae.timon.mapper.MapMapper;
+import org.pinae.timon.mapper.Mapper;
 import org.pinae.timon.mapper.ObjectMapper;
-
+import org.pinae.timon.mapper.annotation.Entity;
 
 /**
  * 数据库会话管理
@@ -23,7 +25,6 @@ import org.pinae.timon.mapper.ObjectMapper;
  *
  */
 public class SQLSession {
-
 	private static Logger log = Logger.getLogger(SQLSession.class);
 
 	private Connection conn = null;
@@ -32,13 +33,6 @@ public class SQLSession {
 		this.conn = conn;
 	}
 	
-	/**
-	 * 执行Select查询并返回第一个结果
-	 * 
-	 * @param sql Select语句
-	 * 
-	 * @return 执行结果
-	 */
 	public Object[] one(String sql) {
 		List<Object[]> table = select(sql);
 		if (table != null && table.size() > 0) {
@@ -46,29 +40,43 @@ public class SQLSession {
 		}
 		return null;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T one(String sql, Class<T> clazz) {
+		List<?> table = select(sql, clazz);
+		if (table != null && table.size() > 0) {
+			return (T) table.get(0);
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T one(String sql, String[] columns, Class<T> clazz) {
+		List<?> table = select(sql, columns, clazz);
+		if (table != null && table.size() > 0) {
+			return (T) table.get(0);
+		}
+		return null;
+	}
 
-	/**
-	 * 执行Select查询
-	 * 
-	 * @param sql Select语句
-	 * 
-	 * @return 执行结果列表
-	 */
 	public List<Object[]> select(String sql) {
 		if (StringUtils.isEmpty(sql)) {
 			return null;
 		} else {
 			sql = sql.trim();
 		}
-
+		
+		List<Object[]> dataList = null;
+		
 		if (sql.toLowerCase().startsWith("select")) {
 
+			dataList = new ArrayList<Object[]>();
+			
 			ResultSet rs = null;
 			Statement stmt = null;
 
 			try {
 				stmt = conn.createStatement();
-				List<Object[]> table = new ArrayList<Object[]>();
 
 				rs = stmt.executeQuery(sql);
 				ResultSetMetaData rsmd = rs.getMetaData();
@@ -79,12 +87,11 @@ public class SQLSession {
 					for (int i = 0; i < columnCount; i++) {
 						row[i] = rs.getObject(i + 1);
 					}
-					table.add(row);
+					dataList.add(row);
 				}
 
-				return table;
 			} catch (SQLException e) {
-				log.error(String.format("%s : %s", sql, e.getMessage()));
+				log.error(String.format("select Exception: exception=%s; sql=%s", e.getMessage(), sql));
 			} finally {
 				try {
 					if (rs != null && rs.isClosed() == false) {
@@ -98,16 +105,45 @@ public class SQLSession {
 				}
 			}
 		}
-		return null;
+		return dataList;
 	}
+	
+	public List<?> select(String sql, String[] columns, Class<?> clazz) {
+		List<Object[]> dataList = select(sql);
+		if (clazz == null) {
+			clazz = Map.class;
+		}
+		
+		Mapper mapper = null;
+		if (clazz.equals(Map.class)) {
+			mapper = new MapMapper();
+		} else {
+			if (clazz.isAnnotationPresent(Entity.class)) {
+				mapper = new AnnotationMapper(clazz);
+			} else {
+				mapper = new ObjectMapper(clazz);
+			}
+		}
+		
+		List<?> table = null;
+		if (mapper != null) {
+			table = mapper.toList(dataList, columns);
+		}
+		
+		return table;
+	}
+	
+	public List<?> select(String sql, Class<?> clazz) {
+		List<?> table = null;
+		
+		String columns[] = getColumns(sql);
+		if (columns != null) {
+			table = select(sql, columns, clazz);
+		}
+		return table;
+	}
+	
 
-	/**
-	 * 执行计数查询
-	 * 
-	 * @param sql 需要计数的SQL语句（select语句）
-	 * @return 查询计数结果
-	 * 
-	 */
 	public long count(String sql) {
 		if (StringUtils.isEmpty(sql)) {
 			return 0;
@@ -140,13 +176,6 @@ public class SQLSession {
 		return count;
 	}
 
-	/**
-	 * 执行SQL语句
-	 * 
-	 * @param sql 需要执行的SQL
-	 * 
-	 * @return 是否执行成功
-	 */
 	public boolean execute(String sql) {
 		if (StringUtils.isEmpty(sql)) {
 			return false;
@@ -157,13 +186,12 @@ public class SQLSession {
 		boolean result = false;
 
 		Statement stmt = null;
-
 		try {
 			stmt = conn.createStatement();
 			stmt.execute(sql);
 			result = true;
 		} catch (SQLException e) {
-			log.error(String.format("%s : %s", sql, e.getMessage()));
+			log.error(String.format("execute Exception: exception=%s; sql=%s", e.getMessage(), sql));
 		} finally {
 			try {
 				if (stmt != null && stmt.isClosed() == false) {
@@ -177,13 +205,6 @@ public class SQLSession {
 		return result;
 	}
 
-	/**
-	 * 批量执行SQL语句
-	 * 
-	 * @param sqlList 需要执行的SQL列表
-	 * 
-	 * @return 是否执行成功
-	 */
 	public boolean execute(List<String> sqlList) {
 
 		if (sqlList == null || sqlList.size() == 0) {
@@ -205,95 +226,71 @@ public class SQLSession {
 			stmt.executeBatch();
 			result = true;
 		} catch (SQLException e) {
-			log.error(String.format("%s", e.getMessage()));
+			log.error(String.format("execute Exception: exception=%s", e.getMessage()));
 		} finally {
 			try {
 				if (stmt != null && stmt.isClosed() == false) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				log.error(e.getMessage(), e);
+				log.error(e.getMessage());
 			}
 		}
 
 		return result;
 	}
 	
-	public SQLMetaData getMetaData() {
+	public Connection getConnection() {
+		return this.conn;
+	}
+	
+	public SQLMetadata getMetaData() {
 		if (conn != null) {
-			return new SQLMetaData(conn);
+			return new SQLMetadata(conn);
 		}
 		return null;
 	}
 
 	public String[] getColumns(String sql) {
-		SQLMetaData metadata = getMetaData();
+		SQLMetadata metadata = getMetaData();
 		if (metadata != null) {
 			return metadata.getColumnsBySQL(sql);
 		}
 		return null;
 	}
-	
-	public List<Map<String, Object>> toMapList(List<Object[]> table, String columns[]) {
-		if (table != null && columns != null) {
-			MapMapper mapper = new MapMapper();
-			return mapper.toMapList(table, columns);
-		}
-		return null;
-	}
-	
-	public List<Map<String, Object>> toMapList(List<Object[]> table, String columns[], Map<String, Object> defaultMap) {
-		if (table != null && columns != null) {
-			MapMapper mapper = new MapMapper();
-			if (defaultMap != null) {
-				return mapper.toMapList(table, columns, defaultMap);
-			} else {
-				return mapper.toMapList(table, columns);
-			}
-		}
-		return null;
-	}
-	
-	public List<?> toObjectList(List<Object[]> table, String columns[], Class<?> clazz) {
-		if (table != null && columns != null) {
-			ObjectMapper mapper = new ObjectMapper();
-			return (List<?>) mapper.toObjectList(table, columns, clazz);
-		}
-		return null;
-	}
-	
-	/**
-	 * 事务提交
-	 * 
-	 */
+
 	public void commit() {
 		try {
 			conn.commit();
 		} catch (SQLException e) {
-			log.error(String.format("commit exception: exception=%s", e.getMessage()));
+			log.error(String.format("commit Exception: exception=%s", e.getMessage()));
 		}
 	}
-	
-	/**
-	 * 事务回滚
-	 * 
-	 */
+
 	public void rollback() {
 		try {
 			conn.rollback();
 		} catch (SQLException e) {
-			log.error(String.format("rollback exception: exception=%s", e.getMessage()));
+			log.error(String.format("rollback Exception: exception=%s", e.getMessage()));
 		}
 	}
 
-	/**
-	 * 关闭数据库连接
-	 */
 	public void close() {
 		try {
 			conn.close();
 		} catch (SQLException e) {
-			log.error(String.format("close exception: exception=%s", e.getMessage()));
+			log.error(String.format("close Exception: exception=%s", e.getMessage()));
 		}
+	}
+	
+	public boolean isClosed() {
+		try {
+			if (conn != null) {
+				return conn.isClosed();
+			}
+		} catch (SQLException e) {
+			log.error(String.format("isClosed Exception: exception=%s", e.getMessage()));
+		}
+		return true;
 	}
 }
