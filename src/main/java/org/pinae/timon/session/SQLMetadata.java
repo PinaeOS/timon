@@ -12,13 +12,13 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-public class SQLMetaData {
+public class SQLMetadata {
 
-	private static Logger log = Logger.getLogger(SQLMetaData.class);
+	private static Logger log = Logger.getLogger(SQLMetadata.class);
 
 	private Connection conn = null;
 	
-	public SQLMetaData(Connection conn) {
+	public SQLMetadata(Connection conn) {
 		this.conn = conn;
 	}
 
@@ -54,7 +54,7 @@ public class SQLMetaData {
 			}
 
 		} catch (Exception e) {
-			log.error(String.format("Get Metadata FAIL: ", e.getMessage()));
+			log.error(String.format("getMetadataBySQL Exception: exception=%s", e.getMessage()));
 		}
 		return table;
 	}
@@ -74,11 +74,12 @@ public class SQLMetaData {
 			columns = new String[table.size()];
 			for (int i = 0 ; i < table.size() ; i++) {
 				Map<String, String> row = table.get(i);
-				if (row.containsKey("NAME")) {
+				if (row.containsKey("NAME") && row.get("NAME") != null) {
 					columns[i] = row.get("NAME");
 				}
 			}
 		}
+		
 		return columns;
 	}
 
@@ -112,7 +113,7 @@ public class SQLMetaData {
 				
 			}
 		} catch (Exception e) {
-			log.error(String.format("Get Metadata FAIL: ", e.getMessage()));
+			log.error(String.format("getMetadataByTable Exception: exception=%s", e.getMessage()));
 		}
 		return table;
 	}
