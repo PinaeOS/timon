@@ -12,10 +12,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-import org.pinae.timon.io.XMLMapperReader;
 import org.pinae.timon.io.SQLMapper.SQL;
 import org.pinae.timon.io.SQLMapper.SQL.Choose;
+import org.pinae.timon.io.XMLMapperReader;
 import org.pinae.timon.util.ClassLoaderUtils;
 
 /**
@@ -63,7 +62,6 @@ public class SQLBuilder {
 	 * 根据SQL描述名称和参数获取SQL
 	 * 
 	 * @param name SQL描述名称
-	 * 
 	 * @param statments 需要替换的SQL语句
 	 * 
 	 * @return SQL语句
@@ -345,6 +343,7 @@ public class SQLBuilder {
 	 * 获得查询SQL中可返回的结果数量的SQL语句
 	 * 
 	 * @param sql 原SQL语句
+	 * 
 	 * @return SQL可返回的结果数量SQL语句
 	 */
 	public static String getCountSQL(String sql) {
