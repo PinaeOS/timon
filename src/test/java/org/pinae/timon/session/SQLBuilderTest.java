@@ -28,7 +28,7 @@ public class SQLBuilderTest {
 	@Test
 	public void testGetSQLByName() {
 		String sql = builder.getSQLByName("GET_ID");
-		assertEquals(sql, "select id from test");
+		assertEquals(sql, "select id from person");
 	}
 	
 	@Test
@@ -36,7 +36,7 @@ public class SQLBuilderTest {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
 		String sql = builder.getSQLByNameWithParameters("GET_PERSON_1", parameters);
-		assertEquals(sql, "select * from test where 1=1 and id = 20");
+		assertEquals(sql, "select * from person where 1=1 and id = 20");
 	}
 	
 	@Test
@@ -44,11 +44,11 @@ public class SQLBuilderTest {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
 		String sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
-		assertEquals(sql, "select * from test where 1=1 and id = 20 order by id");
+		assertEquals(sql, "select * from person where 1=1 and id = 20 order by id");
 		
 		parameters.put("name", "Hui");
 		sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
-		assertEquals(sql, "select * from test where 1=1 and id = 20 and name = 'Hui' order by id");
+		assertEquals(sql, "select * from person where 1=1 and id = 20 and name = 'Hui' order by id");
 	}
 	
 	@Test
@@ -61,7 +61,7 @@ public class SQLBuilderTest {
 		person.setPhone("13391562775");
 		
 		String sql = builder.getSQLByNameWithParameters("INSERT_PERSON", person);
-		assertEquals(sql, "insert into test(id, name, age, phone) values (3, 'Joe', 20, '13391562775')");
+		assertEquals(sql, "insert into person(id, name, age, phone) values (3, 'Joe', 20, '13391562775')");
 	}
 	
 	@Test
@@ -76,21 +76,21 @@ public class SQLBuilderTest {
 	public void testGetLimitSQLForOracle() {
 		String sql = builder.getSQLByName("GET_ID");
 		sql = SQLBuilder.getLimitSQL(sql, 10, 10, "oracle");
-		assertEquals(sql, "select * from ( select row_.*, rownum rownum_ from ( select id from test ) row_ where rownum <= 20) where rownum_ > 10");
+		assertEquals(sql, "select * from ( select row_.*, rownum rownum_ from ( select id from person ) row_ where rownum <= 20) where rownum_ > 10");
 	}
 	
 	@Test
 	public void testGetLimitSQLForMySQL() {
 		String sql = builder.getSQLByName("GET_ID");
 		sql = SQLBuilder.getLimitSQL(sql, 10, 10, "mysql");
-		assertEquals(sql, "select * from ( select id from test ) t limit 10, 10");
+		assertEquals(sql, "select * from ( select id from person ) t limit 10, 10");
 	}
 	
 	@Test
 	public void testGetCountSQL() {
 		String sql = builder.getSQLByName("GET_ID");
 		sql = SQLBuilder.getCountSQL(sql);
-		assertEquals(sql, "select count(*) from ( select id from test ) t");
+		assertEquals(sql, "select count(*) from ( select id from person ) t");
 	}
 	
 }

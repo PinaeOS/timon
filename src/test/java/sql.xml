@@ -54,7 +54,7 @@
 	</sql>
 	
 	<sql name="INSERT_PERSON">
-		insert into test(id, name, age, phone) values (:id, :name, :age, :phone)
+		insert into person(id, name, age, phone) values (:id, :name, :age, :phone)
 	</sql>
 	
 </mapper>
