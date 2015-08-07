@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.pinae.timon.io.SQLMapper.SQL;
 import org.pinae.timon.io.SQLMapper.SQL.Choose;
+import org.pinae.timon.io.SQLScriptReader;
 import org.pinae.timon.io.XMLMapperReader;
 import org.pinae.timon.util.ClassLoaderUtils;
 
@@ -28,12 +29,16 @@ import org.pinae.timon.util.ClassLoaderUtils;
 public class SQLBuilder {
 
 	private Map<String, SQL> sqlMap = new HashMap<String, SQL>();
-
+	private Map<String, String> scriptMap = new HashMap<String, String>();
+	
 	public SQLBuilder() throws IOException {
 		String path = ClassLoaderUtils.getResourcePath("");
 		
 		try {
-			this.sqlMap = XMLMapperReader.read(path, "sql.xml");
+			XMLMapperReader reader = new XMLMapperReader(path, "sql.xml");
+			
+			this.sqlMap = reader.getSQLMap();
+			this.scriptMap = reader.getScriptMap();
 		} catch (IOException e) {
 			throw e;
 		}
@@ -41,7 +46,10 @@ public class SQLBuilder {
 	
 	public SQLBuilder(String path, String filename) throws IOException {
 		try {
-			this.sqlMap = XMLMapperReader.read(path, filename);
+			XMLMapperReader reader = new XMLMapperReader(path, filename);
+			
+			this.sqlMap = reader.getSQLMap();
+			this.scriptMap = reader.getScriptMap();
 		} catch (IOException e) {
 			throw e;
 		}	
@@ -256,7 +264,7 @@ public class SQLBuilder {
 						} else if (value instanceof List) {
 							StringBuffer valueBuffer = new StringBuffer();
 
-							List list = (List) value;
+							List<?> list = (List<?>) value;
 							for (Object item : list) {
 								if (item instanceof String) {
 									valueBuffer.append(String.format("'%s'", item) + ",");
@@ -291,6 +299,32 @@ public class SQLBuilder {
 		return sql;
 	}
 
+	/**
+	 * 获得SQL脚本中SQL语句列表
+	 * 
+	 * @param name SQL脚本名称
+	 * 
+	 * @return SQL语句列表
+	 */
+	public List<String> getScript(String name) {
+		return getScript(name, "UTF8");
+	}
+	
+	/**
+	 * 获得SQL脚本中SQL语句列表
+	 * 
+	 * @param name SQL脚本名称
+	 * @param encoding SQL脚本编码
+	 * 
+	 * @return SQL语句列表
+	 */
+	public List<String> getScript(String name, String encoding) {
+		String filename = this.scriptMap.get(name);
+		List<String> sqlList = new SQLScriptReader().getSQLList(filename, encoding);
+		
+		return sqlList;
+	}
+	
 	/**
 	 * 限制查询条数的SQL
 	 * 
@@ -357,6 +391,5 @@ public class SQLBuilder {
 		}
 		return null;
 	}
-
 
 }

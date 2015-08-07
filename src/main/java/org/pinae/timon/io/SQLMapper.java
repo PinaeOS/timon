@@ -8,7 +8,12 @@ import org.pinae.nala.xb.annotation.Element;
 import org.pinae.nala.xb.annotation.ElementValue;
 import org.pinae.nala.xb.annotation.Root;
 
-
+/**
+ * SQL映射
+ * 
+ * @author huiyugeng
+ *
+ */
 @Root(name = "mapper")
 public class SQLMapper {
 	@Attribute(name="namespaces")
@@ -16,6 +21,9 @@ public class SQLMapper {
 	
 	@Element(name = "import")
 	private List<Import> importList = new ArrayList<Import>();
+	
+	@Element(name = "script")
+	private List<Script> scriptList = new ArrayList<Script>();
 
 	@Element(name = "global")
 	private List<GlobalVar> globalVarList = new ArrayList<GlobalVar>();
@@ -35,7 +43,7 @@ public class SQLMapper {
 		return sqlList;
 	}
 
-	public void setSqlList(SQL sql) {
+	public void addSql(SQL sql) {
 		this.sqlList.add(sql);
 	}
 
@@ -43,7 +51,7 @@ public class SQLMapper {
 		return importList;
 	}
 
-	public void setImportList(Import sqlImport) {
+	public void addImport(Import sqlImport) {
 		this.importList.add(sqlImport);
 	}
 
@@ -51,8 +59,16 @@ public class SQLMapper {
 		return globalVarList;
 	}
 
-	public void setGlobalVarList(GlobalVar global) {
+	public void addGlobalVar(GlobalVar global) {
 		this.globalVarList.add(global);
+	}
+
+	public List<Script> getScriptList() {
+		return scriptList;
+	}
+
+	public void addScript(Script script) {
+		this.scriptList.add(script);
 	}
 
 	public class Import {
@@ -92,6 +108,31 @@ public class SQLMapper {
 			this.value = value;
 		}
 
+	}
+	
+	public class Script {
+		@Attribute(name = "name")
+		private String name;
+		
+		@Attribute(name = "file")
+		private String file;
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getFile() {
+			return file;
+		}
+
+		public void setFile(String file) {
+			this.file = file;
+		}
+		
 	}
 
 	public class SQL {

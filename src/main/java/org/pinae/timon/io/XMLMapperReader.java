@@ -16,32 +16,42 @@ import org.pinae.nala.xb.util.ResourceReader;
 import org.pinae.timon.io.SQLMapper.GlobalVar;
 import org.pinae.timon.io.SQLMapper.Import;
 import org.pinae.timon.io.SQLMapper.SQL;
+import org.pinae.timon.io.SQLMapper.Script;
 
 /**
- * 从文件中读取SQL配置
+ * 从配置文件中读取SQL配置
  * 
  * @author huiyugeng
  *
  */
 public class XMLMapperReader {
 	
+	private Map<String, SQL> sqlMap = new HashMap<String, SQL>();
+	private Map<String, String> scriptMap = new HashMap<String, String>();
+	
+	public XMLMapperReader(String path, String filename) throws IOException {
+		read(path, filename, null);
+	}
+	
 	/**
 	 * 获取SQL列表
-	 * 
-	 * @param filename SQL文件
-	 * @throws IOException 
 	 */
-	public static Map<String, SQL> read(String path, String filename) throws IOException {
-		return read(path, filename, null);
+	public Map<String, SQL> getSQLMap() {
+		return this.sqlMap;
+	}
+	
+	/**
+	 * 获取脚本文件列表
+	 */
+	public Map<String, String> getScriptMap() {
+		return this.scriptMap;
 	}
 
 
-	public static Map<String, SQL> read(String path, String filename, Map<String, String> globalVar) throws IOException {
-		Map<String, SQL> sqlMap = new HashMap<String, SQL>();
+	private void read(String path, String filename, Map<String, String> globalVar) throws IOException {
 		
-		if (globalVar == null) {
-			globalVar = new HashMap<String, String>();
-		}
+		Map<String, String> subGlobalVar = new HashMap<String, String>();
+		subGlobalVar.putAll(globalVar);
 
 		SQLMapper mapper = new SQLMapper();
 
@@ -87,16 +97,25 @@ public class XMLMapperReader {
 				sqlName = namespace.trim() + "." + sqlName;
 			}
 			
-			sqlMap.put(sqlName, sql);
+			this.sqlMap.put(sqlName, sql);
+		}
+		
+		List<Script> scriptList = mapper.getScriptList();
+		for (Script script : scriptList) {
+			String scriptName = script.getName();
+			String scriptFile = script.getFile();
+			
+			if (StringUtils.isNotBlank(scriptName) && StringUtils.isNotBlank(scriptFile)) {
+				this.scriptMap.put(scriptName, scriptFile);
+			}
 		}
 
 		// 载入引入SQL
 		List<Import> imports = mapper.getImportList();
 		for (Import sqlImport : imports) {
-			sqlMap.putAll(read(path, sqlImport.getFile(), globalVar));
+			read(path, sqlImport.getFile(), globalVar);
 		}
 		
-		return sqlMap;
 
 	}
 }

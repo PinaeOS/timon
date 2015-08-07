@@ -1,5 +1,6 @@
 package org.pinae.timon.session;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -152,7 +153,11 @@ public class SQLSession {
 		}
 		//如果SQL语句中不包含count关键字，则构建一个计数SQL
 		if (!StringUtils.containsIgnoreCase(sql, "count")) {
-			sql = SQLBuilder.getCountSQL(sql);
+			try {
+				sql = new SQLBuilder().getCountSQL(sql);
+			} catch (IOException e) {
+				log.error(String.format("count Exception: exception=%s; sql=%s", e.getMessage(), sql));
+			}
 		}
 		
 		long count = 0;
