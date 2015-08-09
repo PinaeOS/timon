@@ -60,6 +60,11 @@ public class SQLBuilder {
 			throw e;
 		}	
 	}
+	
+	public SQLBuilder(Map<String, SQL> sqlMap, Map<String, String> scriptMap) {
+		this.sqlMap = sqlMap;
+		this.scriptMap = scriptMap;
+	}
 
 	/**
 	 * 根据SQL描述名称获取SQL
@@ -81,7 +86,7 @@ public class SQLBuilder {
 	 * @return SQL语句
 	 */
 	public String getSQLByName(String name, Map<String, Object> statments) {
-		SQL sql = sqlMap.get(name);
+		SQL sql = this.sqlMap.get(name);
 		if (sql != null) {
 			return replaceStatement(sql, statments);
 		} else {
@@ -105,7 +110,7 @@ public class SQLBuilder {
 		
 		Map<String, Object> parameterMap = buildParameters(parameters);
 		
-		SQL sql = sqlMap.get(name);
+		SQL sql = this.sqlMap.get(name);
 		if (sql != null) {
 			return replaceSQL(sql, parameterMap);
 		} else {
@@ -176,7 +181,7 @@ public class SQLBuilder {
 			while (regexMatcher.find()) {
 				String subSQLName = regexMatcher.group(1);
 				
-				SQL subSQL = sqlMap.get(subSQLName);
+				SQL subSQL = this.sqlMap.get(subSQLName);
 				if (subSQL != null) {
 					String subSQLContent = replaceSQL(subSQL, subSQLs);
 					
