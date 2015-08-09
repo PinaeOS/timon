@@ -24,7 +24,49 @@ Maven
 ## Getting Start ##
 
 demo for Timon:
+
+XML Mapper (sql.xml):
+
+	<?xml version="1.0" encoding="UTF-8" ?>
 	
+	<global key="table" value="person" />
+	
+	<mapper namespaces="org.piane.timon">
+		<sql name="getPerson">
+			select * from :table where 1=1 
+			<choose when="id">
+				and id = :id
+			</choose>
+		</sql>
+	</mapper>
+
+Java Code:
+	
+	public class SQLSessionFactoryDemo {
+
+		public static void main(String[] args) {
+			SQLSessionFactory sessionFactory = null;
+			SQLBuilder builder = null;
+			
+			try {
+				builder = new SQLBuilder()
+				sessionFactory = new SQLSessionFactory();
+				
+				SQLSession session = sessionFactory.getSession();
+				
+				Map<String, Object> parameters = new HashMap<String, Object>();
+				parameters.put("id", 1);
+				Person person = (Person)session.one(
+					builder.getSQLByNameWithParameters("org.piane.timon.getPerson", parameters), 
+					Person.class);
+					
+				session.close();
+					
+			} catch (IOException e) {
+				
+			}
+		}
+	}
 	
 ## Documentation ##
 
