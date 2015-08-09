@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -91,6 +92,12 @@ public class SQLBuilderTest {
 		String sql = builder.getSQLByName("GET_ID");
 		sql = SQLBuilder.getCountSQL(sql);
 		assertEquals(sql, "select count(*) from ( select id from person ) t");
+	}
+	
+	@Test
+	public void testGetScript() {
+		List<String> sqlList = builder.getScript("TEST_SCRIPT");
+		assertEquals(sqlList.size(), 8);
 	}
 	
 }

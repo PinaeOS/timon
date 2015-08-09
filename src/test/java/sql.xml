@@ -3,20 +3,26 @@
 <mapper namespaces="">
 
 	<import file="sql/sql_parse_test.xml"/>
+	<import file="sql/sql_format_test.xml"/>
+	
+	<script name="TEST_SCRIPT" file="test.sql" />
+	
+	<global key="table" value="person" />
+	<global key="" value="" />
 	
 	<sql name="GET_ID">
-		select id from person
+		select id from :table
 	</sql>
 	
 	<sql name="GET_PERSON_1">
-		select * from person where 1=1 
+		select * from :table where 1=1 
 		<choose when="id">
 			and id = :id
 		</choose>
 	</sql>
 	
 	<sql name="GET_PERSON_2">
-		select * from person where 1=1 {id} {name} {order}
+		select * from :table where 1=1 {id} {name} {order}
 		<choose when="id" statement="id">
 			and id = :id
 		</choose>
@@ -54,7 +60,7 @@
 	</sql>
 	
 	<sql name="INSERT_PERSON">
-		insert into person(id, name, age, phone) values (:id, :name, :age, :phone)
+		insert into :table(id, name, age, phone) values (:id, :name, :age, :phone)
 	</sql>
 	
 </mapper>

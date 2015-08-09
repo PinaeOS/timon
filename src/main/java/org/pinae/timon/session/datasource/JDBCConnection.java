@@ -1,5 +1,6 @@
 package org.pinae.timon.session.datasource;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -26,8 +27,10 @@ public class JDBCConnection implements DBConnection {
 	 * 获取数据库连接
 	 * 
 	 * @return 数据库连接
+	 * 
+	 * @throws IOException 
 	 */
-	public Connection getConnection() {
+	public Connection getConnection() throws IOException {
 		Connection conn = null;
 		try {
 			if (this.datasource != null) {
@@ -36,7 +39,7 @@ public class JDBCConnection implements DBConnection {
 				conn.setAutoCommit(datasource.getBoolean("auto_commit", true));
 			}
 		} catch (Exception e) {
-			log.error("Connection Database Error :" + e.getMessage());
+			throw new IOException(e);
 		}
 		return conn;
 	}

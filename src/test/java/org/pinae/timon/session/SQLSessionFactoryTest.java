@@ -11,25 +11,18 @@ public class SQLSessionFactoryTest {
 
 	@Test
 	public void testGetSession() {
-		SQLBuilder builder = null;
+		SQLSessionFactory sessionFactory = null;
 		
 		try {
-			builder = new SQLBuilder();
+			sessionFactory = new SQLSessionFactory();
+			
+			SQLSession session = sessionFactory.getSession();
+			assertEquals(session.isClosed(), false);
+				
+			session.close();
+				
 		} catch (IOException e) {
 			fail(e.getMessage());
-		}
-		
-		if (builder != null) {
-			
-			SQLSessionFactory sessionFactory = new SQLSessionFactory();
-			SQLSession session = sessionFactory.getSession();
-			
-			assertEquals(session.isClosed(), false);
-			
-			session.close();
-			
-		} else {
-			fail("SQLBuilder is null");
 		}
 	}
 }

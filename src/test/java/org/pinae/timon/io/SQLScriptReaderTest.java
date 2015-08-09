@@ -13,6 +13,6 @@ public class SQLScriptReaderTest {
 		SQLScriptReader reader = new SQLScriptReader();
 		List<String> sqlList = reader.getSQLList("src/test/java/test.sql", "UTF8");
 		
-		assertEquals(sqlList.size(), 3);
+		assertEquals(sqlList.size(), 8);
 	}
 }

@@ -1,5 +1,6 @@
 package org.pinae.timon.session;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -31,11 +32,13 @@ public class SQLBuilder {
 	private Map<String, SQL> sqlMap = new HashMap<String, SQL>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
 	
+	private String path;
+	
 	public SQLBuilder() throws IOException {
-		String path = ClassLoaderUtils.getResourcePath("");
+		this.path = ClassLoaderUtils.getResourcePath("");
 		
 		try {
-			XMLMapperReader reader = new XMLMapperReader(path, "sql.xml");
+			XMLMapperReader reader = new XMLMapperReader(this.path, "sql.xml");
 			
 			this.sqlMap = reader.getSQLMap();
 			this.scriptMap = reader.getScriptMap();
@@ -45,8 +48,11 @@ public class SQLBuilder {
 	}
 	
 	public SQLBuilder(String path, String filename) throws IOException {
+		
+		this.path = path;
+		
 		try {
-			XMLMapperReader reader = new XMLMapperReader(path, filename);
+			XMLMapperReader reader = new XMLMapperReader(this.path, filename);
 			
 			this.sqlMap = reader.getSQLMap();
 			this.scriptMap = reader.getScriptMap();
@@ -320,7 +326,7 @@ public class SQLBuilder {
 	 */
 	public List<String> getScript(String name, String encoding) {
 		String filename = this.scriptMap.get(name);
-		List<String> sqlList = new SQLScriptReader().getSQLList(filename, encoding);
+		List<String> sqlList = new SQLScriptReader().getSQLList(this.path + File.separator + filename, encoding);
 		
 		return sqlList;
 	}
@@ -331,7 +337,7 @@ public class SQLBuilder {
 	 * @param sql SQL语句
 	 * @param offset SQL查询偏移记录数
 	 * @param length SQL目标数量
-	 * @param dbType 数据库类型 Oralce,Mysql
+	 * @param dbType 数据库类型 oralce ,mysql
 	 * 
 	 * @return 限制查询条数的SQL
 	 */

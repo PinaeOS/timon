@@ -51,7 +51,9 @@ public class XMLMapperReader {
 	private void read(String path, String filename, Map<String, String> globalVar) throws IOException {
 		
 		Map<String, String> subGlobalVar = new HashMap<String, String>();
-		subGlobalVar.putAll(globalVar);
+		if (globalVar != null) {
+			subGlobalVar.putAll(globalVar);
+		}
 
 		SQLMapper mapper = new SQLMapper();
 
@@ -74,24 +76,27 @@ public class XMLMapperReader {
 		// 载入全局变量
 		List<GlobalVar> globals = mapper.getGlobalVarList();
 		for (GlobalVar global : globals) {
-			globalVar.put(global.getKey(), global.getValue());
+			subGlobalVar.put(global.getKey(), global.getValue());
 		}
 
-		Set<String> keySet = globalVar.keySet();
+		Set<String> keySet = subGlobalVar.keySet();
 
 		List<SQL> sqlList = mapper.getSqlList();
 		for (SQL sql : sqlList) {
 			String sqlStr = sql.getValue();
 			for (String key : keySet) {
 				// 全局变量替换
-				String value = globalVar.get(key);
-				key = ":" + key;
-				if (sqlStr.contains(key)) {
-					sqlStr = sqlStr.replaceAll(key, value);
+				if (StringUtils.isNotBlank(key)) {
+					String varName = ":" + key;
+					if (sqlStr.contains(varName)) {
+						String value = subGlobalVar.get(key);
+						sqlStr = sqlStr.replaceAll(varName, value);
+					}
 				}
 			}
 			sql.setValue(sqlStr);
 			
+			//使用命名空间构建SQL名称
 			String sqlName =sql.getName();
 			if (StringUtils.isNoneBlank(namespace)) {
 				sqlName = namespace.trim() + "." + sqlName;
@@ -113,7 +118,7 @@ public class XMLMapperReader {
 		// 载入引入SQL
 		List<Import> imports = mapper.getImportList();
 		for (Import sqlImport : imports) {
-			read(path, sqlImport.getFile(), globalVar);
+			read(path, sqlImport.getFile(), subGlobalVar);
 		}
 		
 

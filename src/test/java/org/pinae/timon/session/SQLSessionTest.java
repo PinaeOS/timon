@@ -29,17 +29,20 @@ public class SQLSessionTest {
 	@BeforeClass
 	public static void init() {
 		try {
-			builder = new SQLBuilder();
+			SQLSessionTest.builder = new SQLBuilder();
+			SQLSessionTest.sessionFactory = new SQLSessionFactory();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
-		
-		sessionFactory = new SQLSessionFactory();
 	}
 	
 	@Before
 	public void before() {
-		this.session = sessionFactory.getSession();
+		try {
+			this.session = sessionFactory.getSession();
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
 		log.info("Create New Session:" + this.session.getConnection().toString());
 	}
 	

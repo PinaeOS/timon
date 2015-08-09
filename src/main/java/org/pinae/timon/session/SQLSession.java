@@ -1,6 +1,5 @@
 package org.pinae.timon.session;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -28,9 +27,11 @@ import org.pinae.timon.mapper.annotation.Entity;
 public class SQLSession {
 	private static Logger log = Logger.getLogger(SQLSession.class);
 
+	private String dbType = null;
 	private Connection conn = null;
 	
-	public SQLSession(Connection conn) {
+	public SQLSession(String dbType, Connection conn) {
+		this.dbType = dbType;
 		this.conn = conn;
 	}
 	
@@ -153,11 +154,7 @@ public class SQLSession {
 		}
 		//如果SQL语句中不包含count关键字，则构建一个计数SQL
 		if (!StringUtils.containsIgnoreCase(sql, "count")) {
-			try {
-				sql = new SQLBuilder().getCountSQL(sql);
-			} catch (IOException e) {
-				log.error(String.format("count Exception: exception=%s; sql=%s", e.getMessage(), sql));
-			}
+			sql = SQLBuilder.getCountSQL(sql);
 		}
 		
 		long count = 0;
@@ -249,7 +246,7 @@ public class SQLSession {
 		return this.conn;
 	}
 	
-	public SQLMetadata getMetaData() {
+	public SQLMetadata getMetadata() {
 		if (conn != null) {
 			return new SQLMetadata(conn);
 		}
@@ -257,7 +254,7 @@ public class SQLSession {
 	}
 
 	public String[] getColumns(String sql) {
-		SQLMetadata metadata = getMetaData();
+		SQLMetadata metadata = getMetadata();
 		if (metadata != null) {
 			return metadata.getColumnsBySQL(sql);
 		}
@@ -298,4 +295,9 @@ public class SQLSession {
 		}
 		return true;
 	}
+
+	public String getDbType() {
+		return dbType;
+	}
+
 }
