@@ -15,7 +15,7 @@ import org.pinae.nala.xb.annotation.Root;
  *
  */
 @Root(name = "mapper")
-public class SQLMapper {
+public class SqlMapper {
 	@Attribute(name="namespaces")
 	private String namespaces;
 	

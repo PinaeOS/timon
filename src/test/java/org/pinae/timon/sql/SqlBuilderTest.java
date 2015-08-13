@@ -1,4 +1,4 @@
-package org.pinae.timon.session;
+package org.pinae.timon.sql;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -11,16 +11,17 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.pinae.timon.session.pojo.Person;
+import org.pinae.timon.sql.SqlBuilder;
 
 
-public class SQLBuilderTest {
+public class SqlBuilderTest {
 	
-	private SQLBuilder builder;
+	private SqlBuilder builder;
 	
 	@Before
 	public void before() {
 		try {
-			this.builder = new SQLBuilder();
+			this.builder = new SqlBuilder();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -76,21 +77,21 @@ public class SQLBuilderTest {
 	@Test
 	public void testGetLimitSQLForOracle() {
 		String sql = builder.getSQLByName("GET_ID");
-		sql = SQLBuilder.getLimitSQL(sql, 10, 10, "oracle");
+		sql = SqlBuilder.getLimitSQL(sql, 10, 10, "oracle");
 		assertEquals(sql, "select * from ( select row_.*, rownum rownum_ from ( select id from person ) row_ where rownum <= 20) where rownum_ > 10");
 	}
 	
 	@Test
 	public void testGetLimitSQLForMySQL() {
 		String sql = builder.getSQLByName("GET_ID");
-		sql = SQLBuilder.getLimitSQL(sql, 10, 10, "mysql");
+		sql = SqlBuilder.getLimitSQL(sql, 10, 10, "mysql");
 		assertEquals(sql, "select * from ( select id from person ) t limit 10, 10");
 	}
 	
 	@Test
 	public void testGetCountSQL() {
 		String sql = builder.getSQLByName("GET_ID");
-		sql = SQLBuilder.getCountSQL(sql);
+		sql = SqlBuilder.getCountSQL(sql);
 		assertEquals(sql, "select count(*) from ( select id from person ) t");
 	}
 	

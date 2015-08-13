@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author Huiyugeng
  *
  */
-public class SQLScriptReader {
+public class SqlScriptReader {
 	public List<String> getSQLList(String filename, String encoding) {
 		
 		List<String> content = getContent(filename, encoding);

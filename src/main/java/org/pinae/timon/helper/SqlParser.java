@@ -34,9 +34,9 @@ import org.pinae.timon.helper.parser.UpdateParser;
  * @author Huiyugeng
  *
  */
-public class SQLParser {
+public class SqlParser {
 	
-	private static Logger log = Logger.getLogger(SQLParser.class);
+	private static Logger log = Logger.getLogger(SqlParser.class);
 	
 	private CCJSqlParserManager parserManager = new CCJSqlParserManager();
 	

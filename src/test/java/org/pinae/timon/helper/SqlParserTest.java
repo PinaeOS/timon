@@ -10,21 +10,21 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.pinae.timon.helper.parser.SelectParser;
-import org.pinae.timon.session.SQLBuilder;
+import org.pinae.timon.sql.SqlBuilder;
 
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 
-public class SQLParserTest {
+public class SqlParserTest {
 	
-	private SQLBuilder builder;
+	private SqlBuilder builder;
 	
 	@Before
 	public void before() {
 		try{
-			this.builder = new SQLBuilder();
+			this.builder = new SqlBuilder();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

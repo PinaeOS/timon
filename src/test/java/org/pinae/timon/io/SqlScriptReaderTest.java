@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.junit.Test;
 
-public class SQLScriptReaderTest {
+public class SqlScriptReaderTest {
 	
 	@Test
 	public void testGetSQLList() {
-		SQLScriptReader reader = new SQLScriptReader();
+		SqlScriptReader reader = new SqlScriptReader();
 		List<String> sqlList = reader.getSQLList("src/test/java/test.sql", "UTF8");
 		
 		assertEquals(sqlList.size(), 8);

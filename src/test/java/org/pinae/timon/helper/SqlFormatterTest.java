@@ -7,15 +7,15 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.pinae.timon.session.SQLBuilder;
+import org.pinae.timon.sql.SqlBuilder;
 
-public class SQLFormatterTest {
-	private SQLBuilder builder;
+public class SqlFormatterTest {
+	private SqlBuilder builder;
 	
 	@Before
 	public void before() {
 		try{
-			this.builder = new SQLBuilder();
+			this.builder = new SqlBuilder();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -25,7 +25,7 @@ public class SQLFormatterTest {
 	public void testFormatSQL() {
 		String sql = builder.getSQLByName("org.timon.test.foramt.formatSelectS1");
 		
-		SQLFormatter formatter = new SQLFormatter();
+		SqlFormatter formatter = new SqlFormatter();
 		sql = formatter.format(sql);
 		
 		String line[] = sql.split("\n");
