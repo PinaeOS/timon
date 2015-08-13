@@ -1,9 +1,9 @@
-package org.pinae.timon.mapper;
+package org.pinae.timon.reflection;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapperData {
+public class ReflectorData {
 	public List<Object[]> getData() {
 		List<Object[]> table = new ArrayList<Object[]>();
 		

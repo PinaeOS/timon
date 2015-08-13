@@ -1,4 +1,4 @@
-package org.pinae.timon.mapper;
+package org.pinae.timon.reflection;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -6,13 +6,13 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-public class ObjectMapper implements Mapper {
+public class ObjectReflector implements Reflector {
 	
-	private static Logger log = Logger.getLogger(ObjectMapper.class);
+	private static Logger log = Logger.getLogger(ObjectReflector.class);
 	
 	private Class<?> clazz;
 	
-	public ObjectMapper(Class<?> clazz) {
+	public ObjectReflector(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 	
@@ -43,7 +43,7 @@ public class ObjectMapper implements Mapper {
 				field.set(object, row[i]);
 			}
 		} catch (Exception e) {
-			log.error(String.format("ObjectMapper Exception: exception=%s", e.getMessage()));
+			log.error(String.format("ObjectReflector Exception: exception=%s", e.getMessage()));
 		}
 
 		return (T) object;

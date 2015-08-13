@@ -15,13 +15,13 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @author Huiyugeng
  * 
  */
-public class C3P0Connection implements DBConnection {
+public class C3p0DataSource implements DBDataSource {
 
-	private static Logger log = Logger.getLogger(C3P0Connection.class);
+	private static Logger log = Logger.getLogger(C3p0DataSource.class);
 	
 	private ComboPooledDataSource datasource;
 
-	public C3P0Connection(ConfigMap<String, String> datasource) throws IOException {
+	public C3p0DataSource(ConfigMap<String, String> datasource) throws IOException {
 		try {
 
 			this.datasource = new ComboPooledDataSource();

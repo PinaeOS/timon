@@ -1,4 +1,4 @@
-package org.pinae.timon.mapper;
+package org.pinae.timon.reflection;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.pinae.timon.mapper.annotation.Column;
+import org.pinae.timon.reflection.annotation.Column;
 
-public class AnnotationMapper implements Mapper {
+public class AnnotationReflector implements Reflector {
 	
-	private static Logger log = Logger.getLogger(AnnotationMapper.class);
+	private static Logger log = Logger.getLogger(AnnotationReflector.class);
 	
 	private Class<?> clazz;
 	
-	public AnnotationMapper(Class<?> clazz) {
+	public AnnotationReflector(Class<?> clazz) {
 		this.clazz = clazz;
 	}
 
@@ -66,7 +66,7 @@ public class AnnotationMapper implements Mapper {
 			}
 			
 		} catch (Exception e) {
-			log.error(String.format("AnnotationMapper Exception: exception=%s", e.getMessage()));
+			log.error(String.format("AnnotationReflector Exception: exception=%s", e.getMessage()));
 		}
 
 		return (T) object;

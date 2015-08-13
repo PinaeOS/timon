@@ -1,7 +1,7 @@
 package org.pinae.timon.session.pojo;
 
-import org.pinae.timon.mapper.annotation.Column;
-import org.pinae.timon.mapper.annotation.Entity;
+import org.pinae.timon.reflection.annotation.Column;
+import org.pinae.timon.reflection.annotation.Entity;
 
 @Entity(name = "Person")
 public class AnnotationPerson {

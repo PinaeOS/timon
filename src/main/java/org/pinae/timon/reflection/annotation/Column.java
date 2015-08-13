@@ -1,4 +1,4 @@
-package org.pinae.timon.mapper.annotation;
+package org.pinae.timon.reflection.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 @Documented 
 @Retention(RetentionPolicy.RUNTIME) 
-@Target(ElementType.TYPE) 
-public @interface Entity {
+@Target(ElementType.FIELD) 
+public @interface Column {
 	String name();
 }

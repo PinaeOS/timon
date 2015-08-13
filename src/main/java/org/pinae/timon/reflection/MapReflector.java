@@ -1,4 +1,4 @@
-package org.pinae.timon.mapper;
+package org.pinae.timon.reflection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author huiyugeng
  *
  */
-public class MapMapper implements Mapper {
+public class MapReflector implements Reflector {
 
 	/**
 	 * 将查询结果映射成为List<Map>

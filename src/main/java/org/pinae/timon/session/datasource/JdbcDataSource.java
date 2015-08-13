@@ -7,9 +7,9 @@ import java.sql.DriverManager;
 import org.apache.log4j.Logger;
 import org.pinae.timon.util.ConfigMap;
 
-public class JDBCConnection implements DBConnection {
+public class JdbcDataSource implements DBDataSource {
 	
-	private static Logger log = Logger.getLogger(JDBCConnection.class);
+	private static Logger log = Logger.getLogger(JdbcDataSource.class);
 	
 	/* JDBC连接参数 */
 	private ConfigMap<String, String> datasource = null;
@@ -19,7 +19,7 @@ public class JDBCConnection implements DBConnection {
 	 * 
 	 * @param filename JDBC配置文件名
 	 */
-	public JDBCConnection(ConfigMap<String, String> datasource) {
+	public JdbcDataSource(ConfigMap<String, String> datasource) {
 		this.datasource = datasource;
 	}
 	

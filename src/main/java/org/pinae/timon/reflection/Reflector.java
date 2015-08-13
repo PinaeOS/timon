@@ -1,8 +1,8 @@
-package org.pinae.timon.mapper;
+package org.pinae.timon.reflection;
 
 import java.util.List;
 
-public interface Mapper {
+public interface Reflector {
 	
 	public List<?> toList(List<Object[]> dataList, String[] columns);
 	
