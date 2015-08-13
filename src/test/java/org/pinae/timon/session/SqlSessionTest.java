@@ -16,21 +16,22 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pinae.timon.session.pojo.AnnotationPerson;
 import org.pinae.timon.session.pojo.Person;
+import org.pinae.timon.sql.SqlBuilder;
 
-public class SQLSessionTest {
+public class SqlSessionTest {
 	
-	private static Logger log = Logger.getLogger(SQLSessionTest.class);
+	private static Logger log = Logger.getLogger(SqlSessionTest.class);
 	
-	private static SQLBuilder builder = null;
-	private static SQLSessionFactory sessionFactory = null;
+	private static SqlBuilder builder = null;
+	private static SqlSessionFactory sessionFactory = null;
 	
-	private SQLSession session = null;
+	private SqlSession session = null;
 	
 	@BeforeClass
 	public static void init() {
 		try {
-			SQLSessionTest.builder = new SQLBuilder();
-			SQLSessionTest.sessionFactory = new SQLSessionFactory();
+			SqlSessionTest.builder = new SqlBuilder();
+			SqlSessionTest.sessionFactory = new SqlSessionFactory();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

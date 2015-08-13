@@ -7,16 +7,16 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class SQLSessionFactoryTest {
+public class SqlSessionFactoryTest {
 
 	@Test
 	public void testGetSession() {
-		SQLSessionFactory sessionFactory = null;
+		SqlSessionFactory sessionFactory = null;
 		
 		try {
-			sessionFactory = new SQLSessionFactory();
+			sessionFactory = new SqlSessionFactory();
 			
-			SQLSession session = sessionFactory.getSession();
+			SqlSession session = sessionFactory.getSession();
 			assertEquals(session.isClosed(), false);
 				
 			session.close();
