@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
- * 配置MAP
+ * Map For Configure
  * 
  * @author Huiyugeng
  *
