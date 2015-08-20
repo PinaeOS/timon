@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.apache.log4j.Logger;
 import org.pinae.timon.util.ConfigMap;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -15,9 +14,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * @author Huiyugeng
  * 
  */
-public class C3p0DataSource implements DBDataSource {
-
-	private static Logger log = Logger.getLogger(C3p0DataSource.class);
+public class C3p0DataSource implements DataSource {
 	
 	private ComboPooledDataSource datasource;
 
@@ -46,7 +43,6 @@ public class C3p0DataSource implements DBDataSource {
 	 * 获取数据库连接
 	 * 
 	 * @return 数据库连接
-	 * @throws IOException 
 	 */
 	public Connection getConnection() throws IOException {
 		Connection conn = null;

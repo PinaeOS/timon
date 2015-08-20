@@ -4,12 +4,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-import org.apache.log4j.Logger;
 import org.pinae.timon.util.ConfigMap;
 
-public class JdbcDataSource implements DBDataSource {
-	
-	private static Logger log = Logger.getLogger(JdbcDataSource.class);
+public class JdbcDataSource implements DataSource {
 	
 	/* JDBC连接参数 */
 	private ConfigMap<String, String> datasource = null;
