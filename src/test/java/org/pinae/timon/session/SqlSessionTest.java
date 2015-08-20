@@ -14,6 +14,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.pinae.timon.session.defaults.DefaultSqlSessionFactory;
+import org.pinae.timon.session.handle.ResultHandler;
 import org.pinae.timon.session.pojo.AnnotationPerson;
 import org.pinae.timon.session.pojo.Person;
 import org.pinae.timon.sql.SqlBuilder;
@@ -31,7 +33,7 @@ public class SqlSessionTest {
 	public static void init() {
 		try {
 			SqlSessionTest.builder = new SqlBuilder();
-			SqlSessionTest.sessionFactory = new SqlSessionFactory();
+			SqlSessionTest.sessionFactory = new DefaultSqlSessionFactory();
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -73,6 +75,41 @@ public class SqlSessionTest {
 		parameters.put("id", 1);
 		AnnotationPerson person = (AnnotationPerson)session.one(builder.getSQLByNameWithParameters("GET_PERSON_2", parameters), AnnotationPerson.class);
 		assertNotNull(person.getUserName());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void testSelectWithHandler() {
+		ResultHandler handler = new ResultHandler() {
+			@SuppressWarnings("rawtypes")
+			public <T> void handle(T t) {
+				if (t instanceof List) {
+					List dataList = (List)t;
+					if (dataList.size() == 3) {
+						dataList.remove(0);
+					}
+				}
+			}
+		};
+		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_ID"), 
+				Map.class, handler);
+		assertEquals(table.size(), 2);
+	}
+	
+	@Test
+	public void testOneForAnnotationWithHandler() {
+		ResultHandler handler = new ResultHandler() {
+			public <T> void handle(T t) {
+				if (t instanceof AnnotationPerson) {
+					AnnotationPerson person = (AnnotationPerson)t;
+					person.setUserName("Timon");
+				}
+			}
+		};
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("id", 1);
+		AnnotationPerson person = (AnnotationPerson)session.one(builder.getSQLByNameWithParameters("GET_PERSON_2", parameters), 
+				AnnotationPerson.class, handler);
+		assertEquals(person.getUserName(), "Timon");
 	}
 	
 	@After
