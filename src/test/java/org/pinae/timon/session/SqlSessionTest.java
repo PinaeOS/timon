@@ -34,6 +34,10 @@ public class SqlSessionTest {
 		try {
 			SqlSessionTest.builder = new SqlBuilder();
 			SqlSessionTest.sessionFactory = new DefaultSqlSessionFactory();
+			
+			List<String> initSqlList = SqlSessionTest.builder.getScript("INIT_SCRIPT");
+			SqlSession session = sessionFactory.getSession();
+			session.execute(initSqlList);
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
@@ -49,12 +53,14 @@ public class SqlSessionTest {
 		log.info("Create New Session:" + this.session.getConnection().toString());
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testSelectForMap() {
 		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_ID"), Map.class);
 		assertEquals(table.size(), 3);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testOneForMap() {
 		Map<String, Object> firstRow = (Map<String, Object>)session.one(builder.getSQLByName("GET_ID"), Map.class);

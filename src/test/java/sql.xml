@@ -6,6 +6,7 @@
 	<import file="sql/sql_format_test.xml"/>
 	
 	<script name="TEST_SCRIPT" file="test.sql" />
+	<script name="INIT_SCRIPT" file="init.sql" />
 	
 	<global key="table" value="person" />
 	<global key="" value="" />

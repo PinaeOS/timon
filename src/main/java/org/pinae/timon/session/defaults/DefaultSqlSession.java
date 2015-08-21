@@ -211,11 +211,11 @@ public class DefaultSqlSession implements SqlSession {
 	}
 
 	public boolean execute(String sql) {
-		return this.execute(sql);
+		return this.executor.execute(sql);
 	}
 
 	public boolean execute(List<String> sqlList) {
-		return this.execute(sqlList);
+		return this.executor.execute(sqlList);
 	}
 	
 	public void commit() {

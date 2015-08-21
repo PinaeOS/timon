@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pinae.timon.util.ConfigMap;
 
 public class JdbcDataSource implements DataSource {
@@ -32,7 +33,15 @@ public class JdbcDataSource implements DataSource {
 		try {
 			if (this.datasource != null) {
 				Class.forName(datasource.get("driver"));
-				conn = DriverManager.getConnection(datasource.get("url"), datasource.get("user"), datasource.get("password"));
+				
+				String url = datasource.get("url");
+				String user = datasource.get("user");
+				String password = datasource.get("password");
+				if (StringUtils.isNoneBlank(user)) {
+					conn = DriverManager.getConnection(url, user, password);
+				} else {
+					conn = DriverManager.getConnection(url);
+				}
 				conn.setAutoCommit(datasource.getBoolean("auto_commit", true));
 			}
 		} catch (Exception e) {

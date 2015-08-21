@@ -71,8 +71,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 			} else {
 				throw new IOException(String.format("Unknow datasource type : %s", type));
 			}
-			
-			
 		} else {
 			throw new IOException("Datasource type is NULL");
 		}
