@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,5 +117,15 @@ public class SqlMetadata {
 			log.error(String.format("getMetadataByTable Exception: exception=%s", e.getMessage()));
 		}
 		return table;
+	}
+	
+	public void close() {
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				log.error(String.format("close Exception: exception=%s", e.getMessage()));
+			}
+		}
 	}
 }
