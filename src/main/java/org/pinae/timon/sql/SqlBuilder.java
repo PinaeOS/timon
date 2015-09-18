@@ -73,7 +73,7 @@ public class SqlBuilder {
 	 * @return SQL语句
 	 */
 	public String getSQLByName(String name) {
-		return getSQLByName(name, null);
+		return getSQLByNameWithStatement(name, null);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class SqlBuilder {
 	 * 
 	 * @return SQL语句
 	 */
-	public String getSQLByName(String name, Map<String, Object> statments) {
+	public String getSQLByNameWithStatement(String name, Map<String, Object> statments) {
 		SQL sql = this.sqlMap.get(name);
 		if (sql != null) {
 			return replaceStatement(sql, statments);
@@ -221,7 +221,7 @@ public class SqlBuilder {
 								String statement = choose.getStatement();
 
 								// 如果不存在statement参数，则使用when参数代替
-								if (StringUtils.isNotEmpty(statement)) {
+								if (StringUtils.isEmpty(statement)) {
 									statement = condition;
 								}
 								statement = "{" + statement + "}";
