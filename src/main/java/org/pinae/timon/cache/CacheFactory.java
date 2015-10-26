@@ -27,10 +27,10 @@ public class CacheFactory {
 	/**
 	 * 缓存池(缓存名称，缓存)
 	 */
-	private Map<String, Cache> cacheMap;
+	private Map<String, Cache> cachePool;
 
 	private CacheFactory() {
-		cacheMap = new HashMap<String, Cache>();
+		this.cachePool = new HashMap<String, Cache>();
 	}
 
 	/**
@@ -53,6 +53,10 @@ public class CacheFactory {
 	 * @throws CacheException 异常处理
 	 */
 	public Cache createCache(String name, CacheConfiguration config, int type) throws CacheException {
+		if (config == null) {
+			throw new CacheException("Cache configuration is null");
+		}
+		
 		Cache cache = null;
 
 		switch (type) {
@@ -70,7 +74,9 @@ public class CacheFactory {
 			break;
 		}
 
-		cacheMap.put(name, cache);
+		if (name != null && cache != null) {
+			this.cachePool.put(name, cache);
+		}
 		return cache;
 	}
 
@@ -108,6 +114,7 @@ public class CacheFactory {
 	 * @throws CacheException
 	 */
 	public Cache createCache(String name, CacheConfiguration config) throws CacheException {
+		
 		int type = Cache.SYN_CACHE;
 
 		if (config instanceof RedisCacheConfiguration) {
@@ -128,7 +135,7 @@ public class CacheFactory {
 	 * @return 被清理的缓存
 	 */
 	public Cache removeCache(String name) {
-		return cacheMap.remove(name);
+		return this.cachePool.remove(name);
 	}
 
 	/**
@@ -138,7 +145,7 @@ public class CacheFactory {
 	 * @return 指定的缓存
 	 */
 	public Cache getCache(String name) {
-		return cacheMap.get(name);
+		return this.cachePool.get(name);
 	}
 
 	/**
@@ -147,6 +154,7 @@ public class CacheFactory {
 	 * @return 缓存配置
 	 */
 	public CacheConfiguration load() {
+		// TODO Load cache configuration
 		return null;
 	}
 
@@ -161,7 +169,7 @@ public class CacheFactory {
 	 */
 	public CacheConfiguration load(String filename) throws IOException {
 		CacheConfiguration cacheConfig = null;
-
+		// TODO Load cache configuration
 		ConfigMap<String, String> config = ConfigMap.getConfig(filename);
 
 		return cacheConfig;

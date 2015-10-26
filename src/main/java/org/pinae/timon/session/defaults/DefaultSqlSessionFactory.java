@@ -1,16 +1,15 @@
 package org.pinae.timon.session.defaults;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Properties;
-import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.pinae.timon.cache.Cache;
+import org.pinae.timon.cache.CacheConfiguration;
+import org.pinae.timon.cache.CacheException;
+import org.pinae.timon.cache.CacheFactory;
 import org.pinae.timon.session.DBType;
 import org.pinae.timon.session.SqlSession;
 import org.pinae.timon.session.SqlSessionFactory;
@@ -29,22 +28,35 @@ import org.pinae.timon.util.ConfigMap;
  */
 public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	
+	private static Logger logger = Logger.getLogger(DefaultSqlSessionFactory.class);
+	
+	/**
+	 * 会话数据源
+	 */
 	private DataSource datasource;
-	
+
+	/**
+	 * 缓存
+	 */
+	private Cache cache;
+
+	/**
+	 * Session配置信息
+	 */
 	private ConfigMap<String, String> config = new ConfigMap<String, String>();
-	
+
 	public DefaultSqlSessionFactory() throws IOException {
 		this(ClassLoaderUtils.getResourcePath("") + "database.properties");
 	}
-	
+
 	public DefaultSqlSessionFactory(String filename) throws IOException {
-		this.config = getConfig(filename);
-		
-		createConnectionInstance();
+		this.config = ConfigMap.getConfig(filename);
+
+		createInstance();
 	}
-	
+
 	public DefaultSqlSessionFactory(String type, String driver, String url, String user, String password) throws IOException {
-		//设置数据库数据源属性
+		// 设置数据库数据源属性
 		if (StringUtils.isAnyBlank(type, driver, url, user, password)) {
 			throw new IOException("One or more datasource's properties is NULL");
 		}
@@ -53,20 +65,29 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		this.config.put("url", url);
 		this.config.put("user", user);
 		this.config.put("password", password);
-		
-		createConnectionInstance();
+
+		createInstance();
 	}
-	
+
 	public DefaultSqlSessionFactory(ConfigMap<String, String> datasource) throws IOException {
-		createConnectionInstance();
+		createInstance();
 	}
-	
-	private void createConnectionInstance() throws IOException {
+
+	private void createCache() {
+		CacheConfiguration cacheCofig = CacheConfiguration.getConfig(config);
+		try {
+			this.cache = CacheFactory.getInstance().createCache(this.toString(), cacheCofig);
+		} catch (CacheException e) {
+			logger.error("create error : " + e.getMessage());
+		}
+	}
+
+	private void createInstance() throws IOException {
 		String type = config.get("type");
 		if (type != null) {
 			if (type.equalsIgnoreCase("c3p0")) {
 				datasource = new C3p0DataSource(config);
-			} else if (type.equalsIgnoreCase("jdbc")){
+			} else if (type.equalsIgnoreCase("jdbc")) {
 				datasource = new JdbcDataSource(config);
 			} else {
 				throw new IOException(String.format("Unknow datasource type : %s", type));
@@ -74,12 +95,15 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		} else {
 			throw new IOException("Datasource type is NULL");
 		}
+		
+		// 构建缓存
+		createCache();
 	}
-	
+
 	public SqlSession getSession() throws IOException {
 		return getSession(null);
 	}
-	
+
 	public SqlSession getSession(ConnectionHandler handler) throws IOException {
 		if (datasource != null) {
 			Connection conn = datasource.getConnection();
@@ -90,51 +114,23 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 				} catch (SQLException e) {
 					throw new IOException(e);
 				}
-				
+
 				if (handler != null) {
 					handler.handle(conn);
 				}
-				
-				return new DefaultSqlSession(getDBType(), conn);
+
+				return new DefaultSqlSession(getDBType(), conn, this.cache);
 			}
 		}
 		return null;
 	}
-	
-	private ConfigMap<String, String> getConfig(String filename) throws IOException {
-		
-		ConfigMap<String, String> configMap = new ConfigMap<String, String>();
-		
-		try {
-			Properties properties = new Properties();
 
-			InputStream in = new BufferedInputStream(new FileInputStream(filename));
-			properties.load(in);
-
-			Set<Object> propKeySet = properties.keySet();
-			for (Object propKey : propKeySet) {
-				if (propKeySet != null) {
-					String key = propKey.toString();
-					String value = properties.getProperty(key);
-					configMap.put(key, value);
-				}
-			}
-
-			IOUtils.closeQuietly(in);
-
-		} catch (Exception e) {
-			throw new IOException("Read XML config file ERROR :" + e.getMessage());
-		}
-		
-		return configMap;
-	}
-	
 	private String getDBType() {
-		//数据库驱动关键字
-		String driverKeywords[] = {DBType.MYSQL, DBType.ORACLE, DBType.SQLITE};
-		//数据库驱动类		
+		// 数据库驱动关键字
+		String driverKeywords[] = { DBType.MYSQL, DBType.ORACLE, DBType.SQLITE };
+		// 数据库驱动类
 		String driver = this.config.get("driver");
-		
+
 		String dbType = null;
 		if (StringUtils.isNotBlank(driver)) {
 			for (String keyword : driverKeywords) {
@@ -143,8 +139,8 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 				}
 			}
 		}
-		
+
 		return dbType;
 	}
-	
+
 }

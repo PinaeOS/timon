@@ -86,24 +86,23 @@ public class SynchronizedCache extends AbstractCache {
 		}
 	}
 	
-	public synchronized void put(String key, Object object) {
-		put(key, object, -1);
+	public synchronized void put(String key, Object value) {
+		put(key, value, -1);
 	}
 
-	public synchronized void put(String key, Object object, int expire) {
-		if (key == null || object == null) {
-			throw new NullPointerException("key or value couldn't be null");
+	public synchronized void put(String key, Object value, int expire) {
+		if (key == null) {
+			throw new NullPointerException("cache key couldn't be null");
+		}
+		if (value == null) {
+			throw new NullPointerException("cache value couldn't be null");
 		}
 
 		// 执行缓存清理
 		clean();
-
-		CacheObject cacheObject = cache.get(key);
-		if (cacheObject != null) {
-			cache.remove(key);
-		}
-
-		cacheObject = new CacheObject(key, object);
+		
+		// 向缓存中增加缓存对象
+		CacheObject cacheObject = new CacheObject(key, value, expire);
 		cache.put(key, cacheObject);
 		info.incPuts();
 		info.addMemorySize(cacheObject.getSize());
@@ -117,8 +116,11 @@ public class SynchronizedCache extends AbstractCache {
 		if (cacheObject != null) {
 			// 对象超时
 			long expire = (cacheObject.getExpire() > 0 ? cacheObject.getExpire() : config.getExpire()) * 1000;
+			
 			long now = System.currentTimeMillis();
-			if (cacheObject.getCreateTime().getTime() - now > expire) {
+			long createTime = cacheObject.getCreateTime().getTime();
+			
+			if (Math.abs(now - createTime) > expire) {
 				cache.remove(key);
 			} else {
 				if (cacheObject.getValue() != null) {

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.junit.After;
@@ -22,7 +23,7 @@ import org.pinae.timon.sql.SqlBuilder;
 
 public class SqlSessionTest {
 	
-	private static Logger log = Logger.getLogger(SqlSessionTest.class);
+	private static Logger logger = Logger.getLogger(SqlSessionTest.class);
 	
 	private static SqlBuilder builder = null;
 	private static SqlSessionFactory sessionFactory = null;
@@ -50,7 +51,7 @@ public class SqlSessionTest {
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
-		log.info("Create New Session:" + this.session.getConnection().toString());
+		logger.info("Create New Session:" + this.session.getConnection().toString());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -118,9 +119,39 @@ public class SqlSessionTest {
 		assertEquals(person.getUserName(), "Timon");
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testCache() throws InterruptedException {
+		ResultHandler handler = new ResultHandler() {
+			@SuppressWarnings("rawtypes")
+			public <T> void handle(T t) {
+				if (t instanceof List) {
+					List dataList = (List)t;
+					if (dataList.size() == 3) {
+						dataList.remove(0);
+					}
+				}
+			}
+		};
+		
+		String sql = builder.getSQLByName("org.timon.test.cache.GET_USER_INFO");
+		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(sql, Map.class, handler);
+		assertEquals(table.size(), 2);
+
+		TimeUnit.SECONDS.sleep(5);
+
+		table = (List<Map<String, Object>>) session.select(sql, Map.class);
+		assertEquals(table.size(), 2);
+		
+		TimeUnit.SECONDS.sleep(10);
+		
+		table = (List<Map<String, Object>>) session.select(sql, Map.class);
+		assertEquals(table.size(), 3);
+	}
+	
 	@After
 	public void close() {
-		log.info("Destory Session:" + this.session.getConnection().toString());
+		logger.info("Destory Session:" + this.session.getConnection().toString());
 		this.session.close();
 	}
 }

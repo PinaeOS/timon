@@ -50,7 +50,7 @@ public class SqlBuilderTest {
 		
 		parameters.put("name", "Hui");
 		sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
-		assertEquals(sql, "select * from person where 1=1 and id = 20 and name = 'Hui' order by id");
+		assertEquals(sql, "select * from person where 1=1 and name = 'Hui' and id = 20 order by id");
 	}
 	
 	@Test

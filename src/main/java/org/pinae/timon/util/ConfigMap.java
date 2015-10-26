@@ -1,12 +1,19 @@
 package org.pinae.timon.util;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Properties;
+import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
- * Map For Configure
+ * 配置Map
  * 
  * @author Huiyugeng
  *
@@ -84,5 +91,33 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 					value.toString(), defaultValue));
 			return defaultValue;
 		}
+	}
+	
+	public static ConfigMap<String, String> getConfig(String filename) throws IOException {
+		
+		ConfigMap<String, String> configMap = new ConfigMap<String, String>();
+		
+		try {
+			Properties properties = new Properties();
+
+			InputStream in = new BufferedInputStream(new FileInputStream(filename));
+			properties.load(in);
+
+			Set<Object> propKeySet = properties.keySet();
+			for (Object propKey : propKeySet) {
+				if (propKeySet != null) {
+					String key = propKey.toString();
+					String value = properties.getProperty(key);
+					configMap.put(key, value);
+				}
+			}
+
+			IOUtils.closeQuietly(in);
+
+		} catch (Exception e) {
+			throw new IOException(String.format("Read %s error : %s", filename, e.getMessage()));
+		}
+		
+		return configMap;
 	}
 }

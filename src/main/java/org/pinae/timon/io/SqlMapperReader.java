@@ -83,26 +83,35 @@ public class SqlMapperReader {
 
 		List<SQL> sqlList = mapper.getSqlList();
 		for (SQL sql : sqlList) {
-			String sqlStr = sql.getValue();
-			for (String key : keySet) {
-				// 全局变量替换
-				if (StringUtils.isNotBlank(key)) {
-					String varName = ":" + key;
-					if (sqlStr.contains(varName)) {
-						String value = subGlobalVar.get(key);
-						sqlStr = sqlStr.replaceAll(varName, value);
+			String sqlName =sql.getName();
+			String sqlContent = sql.getValue();
+			
+			if (StringUtils.isBlank(sqlName)) {
+				continue;
+			}
+			
+			if (sqlContent != null) { 
+				for (String key : keySet) {
+					// 全局变量替换
+					if (StringUtils.isNotBlank(key)) {
+						String varName = ":" + key;
+						if (sqlContent.contains(varName)) {
+							String value = subGlobalVar.get(key);
+							sqlContent = sqlContent.replaceAll(varName, value);
+						}
 					}
 				}
+				sql.setValue(sqlContent);
 			}
-			sql.setValue(sqlStr);
 			
 			//使用命名空间构建SQL名称
-			String sqlName =sql.getName();
-			if (StringUtils.isNoneBlank(namespace)) {
+			if (StringUtils.isNotBlank(namespace)) {
 				sqlName = namespace.trim() + "." + sqlName;
 			}
 			
+			sql.setValue(sqlContent);
 			this.sqlMap.put(sqlName, sql);
+		
 		}
 		
 		List<Script> scriptList = mapper.getScriptList();

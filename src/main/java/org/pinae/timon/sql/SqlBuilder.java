@@ -302,7 +302,7 @@ public class SqlBuilder {
 					sql = sql.replaceAll(" +", " ");
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				return null;
 			}
 		}
 

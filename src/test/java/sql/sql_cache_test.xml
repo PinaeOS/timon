@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespaces="org.timon.test.cache">
+	<sql name="GET_USER_INFO">
+		select /* CACHE=10 */ id, name, age, phone from person
+	</sql>
+</mapper>
