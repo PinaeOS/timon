@@ -93,7 +93,7 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 		}
 	}
 	
-	public static ConfigMap<String, String> getConfig(String filename) throws IOException {
+	public static ConfigMap<String, String> loadFromFile(String filename) throws IOException {
 		
 		ConfigMap<String, String> configMap = new ConfigMap<String, String>();
 		
