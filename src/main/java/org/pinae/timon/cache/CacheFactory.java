@@ -12,6 +12,7 @@ import org.pinae.timon.cache.decorator.syn.SynchronizedCache;
 import org.pinae.timon.cache.decorator.syn.SynchronizedCacheConfiguration;
 import org.pinae.timon.cache.decorators.ehcache.EhCache;
 import org.pinae.timon.cache.decorators.ehcache.EhCacheConfiguration;
+import org.pinae.timon.util.ClassLoaderUtils;
 import org.pinae.timon.util.ConfigMap;
 
 /**
@@ -146,33 +147,6 @@ public class CacheFactory {
 	 */
 	public Cache getCache(String name) {
 		return this.cachePool.get(name);
-	}
-
-	/**
-	 * 载入缓存配置 (cache.properties)
-	 * 
-	 * @return 缓存配置
-	 */
-	public CacheConfiguration load() {
-		// TODO Load cache configuration
-		return null;
-	}
-
-	/**
-	 * 载入缓存配置
-	 * 
-	 * @param filename 配置文件
-	 * 
-	 * @return 缓存配置
-	 * 
-	 * @throws IOException IO异常
-	 */
-	public CacheConfiguration load(String filename) throws IOException {
-		CacheConfiguration cacheConfig = null;
-		// TODO Load cache configuration
-		ConfigMap<String, String> config = ConfigMap.getConfig(filename);
-
-		return cacheConfig;
 	}
 
 }

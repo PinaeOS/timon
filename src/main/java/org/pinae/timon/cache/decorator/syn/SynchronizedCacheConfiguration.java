@@ -2,7 +2,10 @@ package org.pinae.timon.cache.decorator.syn;
 
 import org.pinae.timon.cache.CacheConfiguration;
 import org.pinae.timon.cache.decorator.syn.algorithm.Algorithm;
+import org.pinae.timon.cache.decorator.syn.algorithm.FIFOAlgorithm;
 import org.pinae.timon.cache.decorator.syn.algorithm.LFUAlgorithm;
+import org.pinae.timon.cache.decorator.syn.algorithm.LRUAlgorithm;
+import org.pinae.timon.util.ConfigMap;
 
 /**
  * 同步缓存配置
@@ -21,6 +24,25 @@ public final class SynchronizedCacheConfiguration extends CacheConfiguration {
 	 */
 	public SynchronizedCacheConfiguration() {
 		super();
+	}
+	
+	/**
+	 * 构造函数
+	 * 
+	 * @param config 配置条目
+	 * 
+	 */
+	public SynchronizedCacheConfiguration(ConfigMap<String, String> config) {
+		super(config);
+		String algorithm = config.getString("cache.syn.algorithm", "lfu").toLowerCase();
+		if (algorithm.equals("lru")) {
+			this.algorithm = new LRUAlgorithm();
+		} else if (algorithm.equals("fifo")) {
+			this.algorithm = new FIFOAlgorithm();
+		} else {
+			this.algorithm = new LFUAlgorithm();
+		}
+		this.sortLength = config.getInteger("cache.syn.sort_length", 100000);
 	}
 	
 	/**
@@ -58,5 +80,6 @@ public final class SynchronizedCacheConfiguration extends CacheConfiguration {
 	public void setSortLength(int sortLength) {
 		this.sortLength = sortLength;
 	}
+	
 
 }

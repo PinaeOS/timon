@@ -56,6 +56,7 @@ public class CacheInformation {
 
 	public void setSizeToZero() {
 		this.size = 0;
+		this.memorySize = 0;
 	}
 
 	/**

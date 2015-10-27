@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.pinae.timon.cache.AbstractCache;
 import org.pinae.timon.cache.CacheConfiguration;
 import org.pinae.timon.cache.CacheObject;
@@ -18,6 +20,8 @@ import org.pinae.timon.cache.CacheObject;
  */
 public class SynchronizedCache extends AbstractCache {
 
+	private static Logger logger = Logger.getLogger(SynchronizedCache.class);
+	
 	private SynchronizedCacheConfiguration config; // 缓存配置信息
 
 	private Map<String, CacheObject> cache; // 缓存内容
@@ -58,7 +62,7 @@ public class SynchronizedCache extends AbstractCache {
 	 */
 	private boolean checkOverFlow() {
 		// 检查长度是否越界
-		if (config.getMaxSize() > 0 && info.getSize() == config.getMaxSize()) {
+		if (config.getMaxHeapSize() > 0 && info.getSize() == config.getMaxHeapSize()) {
 			return true;
 		}
 
@@ -92,20 +96,32 @@ public class SynchronizedCache extends AbstractCache {
 
 	public synchronized void put(String key, Object value, int expire) {
 		if (key == null) {
-			throw new NullPointerException("cache key couldn't be null");
+			throw new NullPointerException("cache key can't be null");
 		}
 		if (value == null) {
-			throw new NullPointerException("cache value couldn't be null");
+			throw new NullPointerException("cache value can't be null");
 		}
-
-		// 执行缓存清理
-		clean();
 		
 		// 向缓存中增加缓存对象
 		CacheObject cacheObject = new CacheObject(key, value, expire);
-		cache.put(key, cacheObject);
-		info.incPuts();
-		info.addMemorySize(cacheObject.getSize());
+		long objectSize = cacheObject.getSize();
+		
+		// 判断对象长度是否超出最大限制
+		if (config.getMaxObjectSize() == 0 || objectSize <= config.getMaxObjectSize()) {
+			
+			// 执行缓存清理
+			clean();
+			
+			// 缓存对象加入缓存中
+			cache.put(key, cacheObject);
+			
+			info.incPuts();
+			info.addMemorySize(objectSize);
+
+		} else {
+			logger.info(String.format("Object size over max_object_size : key=%s, object_size=%d, max_object_size=%d", 
+					StringUtils.abbreviate(key, 15), objectSize, config.getMaxObjectSize()));
+		}
 	}
 
 	public synchronized Object get(String key) {
@@ -114,7 +130,7 @@ public class SynchronizedCache extends AbstractCache {
 		Object value = null;
 		
 		if (cacheObject != null) {
-			// 对象超时
+			// 对象超时判断: 优先判断缓存对象超时, 再判断缓存超时
 			long expire = (cacheObject.getExpire() > 0 ? cacheObject.getExpire() : config.getExpire()) * 1000;
 			
 			long now = System.currentTimeMillis();
