@@ -50,8 +50,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	public DefaultSqlSessionFactory(String filename) throws IOException {
-		this.config = ConfigMap.getConfig(filename);
-
+		this.config = ConfigMap.loadFromFile(filename);
 		createInstance();
 	}
 
@@ -74,11 +73,22 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	private void createCache() {
-		CacheConfiguration cacheCofig = CacheConfiguration.getConfig(config);
+		String cacheConfigFile = ClassLoaderUtils.getResourcePath("") + "cache.properties";
+		if (config.containsKey("cache.config")) {
+			cacheConfigFile = config.get("cache.config");
+		}
+		CacheConfiguration cacheConfig = CacheConfiguration.getConfig(config);
 		try {
-			this.cache = CacheFactory.getInstance().createCache(this.toString(), cacheCofig);
+			if (cacheConfig != null) {
+				String cacheName = this.toString();
+				this.cache = CacheFactory.getInstance().createCache(cacheName, cacheConfig);
+				logger.info(String.format("Cache create successful: max_size=%d, expire=%d", 
+						cacheConfig.getMaxHeapSize(), cacheConfig.getExpire()));
+			} else {
+				logger.info("Cache is DISABLE");
+			}
 		} catch (CacheException e) {
-			logger.error("create error : " + e.getMessage());
+			logger.error("Cache create error: " + e.getMessage());
 		}
 	}
 
