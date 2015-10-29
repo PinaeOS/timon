@@ -1,19 +1,12 @@
 package org.pinae.timon.cache;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.pinae.timon.cache.decorator.memcached.MemcachedCache;
-import org.pinae.timon.cache.decorator.memcached.MemcachedCacheConfiguration;
-import org.pinae.timon.cache.decorator.redis.RedisCache;
-import org.pinae.timon.cache.decorator.redis.RedisCacheConfiguration;
 import org.pinae.timon.cache.decorator.syn.SynchronizedCache;
 import org.pinae.timon.cache.decorator.syn.SynchronizedCacheConfiguration;
 import org.pinae.timon.cache.decorators.ehcache.EhCache;
 import org.pinae.timon.cache.decorators.ehcache.EhCacheConfiguration;
-import org.pinae.timon.util.ClassLoaderUtils;
-import org.pinae.timon.util.ConfigMap;
 
 /**
  * 缓存生成工厂类
@@ -64,14 +57,8 @@ public class CacheFactory {
 		case Cache.SYN_CACHE:
 			cache = new SynchronizedCache(name, (SynchronizedCacheConfiguration) config);
 			break;
-		case Cache.REDIS_CACHE:
-			cache = new RedisCache(name, (RedisCacheConfiguration) config);
-			break;
-		case Cache.MEMCACHED_CACHE:
-			cache = new MemcachedCache(name, (MemcachedCacheConfiguration) config);
-			break;
 		case Cache.EHCACHE_CACHE:
-			cache = new EhCache(name, (MemcachedCacheConfiguration) config);
+			cache = new EhCache(name, (EhCacheConfiguration) config);
 			break;
 		}
 
@@ -116,13 +103,10 @@ public class CacheFactory {
 	 */
 	public Cache createCache(String name, CacheConfiguration config) throws CacheException {
 		
-		int type = Cache.SYN_CACHE;
-
-		if (config instanceof RedisCacheConfiguration) {
-			type = Cache.REDIS_CACHE;
-		} else if (config instanceof MemcachedCacheConfiguration) {
-			type = Cache.MEMCACHED_CACHE;
-		} else if (config instanceof EhCacheConfiguration) {
+		// 默认使用同步缓存
+		int type = Cache.SYN_CACHE; 
+		
+		if (config instanceof EhCacheConfiguration) {
 			type = Cache.EHCACHE_CACHE;
 		}
 		return createCache(name, config, type);

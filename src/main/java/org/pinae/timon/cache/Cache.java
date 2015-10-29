@@ -17,15 +17,6 @@ public interface Cache {
 	 */
 	public static final int EHCACHE_CACHE = 1;
 
-	/**
-	 * Redis缓存
-	 */
-	public static final int REDIS_CACHE = 2;
-	
-	/**
-	 * Memcachced缓存
-	 */
-	public static final int MEMCACHED_CACHE = 3;
 	
 	/**
 	 * 获取缓存信息

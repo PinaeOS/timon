@@ -1,5 +1,6 @@
 package org.pinae.timon.session.defaults;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -43,15 +44,24 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	/**
 	 * Session配置信息
 	 */
-	private ConfigMap<String, String> config = new ConfigMap<String, String>();
+	private ConfigMap<String, String> sessionConfigMap = new ConfigMap<String, String>();
 
 	public DefaultSqlSessionFactory() throws IOException {
 		this(ClassLoaderUtils.getResourcePath("") + "database.properties");
 	}
 
 	public DefaultSqlSessionFactory(String filename) throws IOException {
-		this.config = ConfigMap.loadFromFile(filename);
-		createInstance();
+		if (StringUtils.isBlank(filename)) {
+			throw new NullPointerException("filename is NULL");
+		}
+		
+		File file = new File(filename);
+		if (file.exists() && file.isFile()) {
+			this.sessionConfigMap = ConfigMap.load(file);
+			createInstance();
+		} else {
+			throw new IOException("No such file : " + filename);
+		}
 	}
 
 	public DefaultSqlSessionFactory(String type, String driver, String url, String user, String password) throws IOException {
@@ -59,11 +69,11 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		if (StringUtils.isAnyBlank(type, driver, url, user, password)) {
 			throw new IOException("One or more datasource's properties is NULL");
 		}
-		this.config.put("connection", type);
-		this.config.put("driver", driver);
-		this.config.put("url", url);
-		this.config.put("user", user);
-		this.config.put("password", password);
+		this.sessionConfigMap.put("connection", type);
+		this.sessionConfigMap.put("driver", driver);
+		this.sessionConfigMap.put("url", url);
+		this.sessionConfigMap.put("user", user);
+		this.sessionConfigMap.put("password", password);
 
 		createInstance();
 	}
@@ -72,16 +82,25 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		createInstance();
 	}
 
-	private void createCache() {
+	private void createCache() throws IOException {
 		String cacheConfigFile = ClassLoaderUtils.getResourcePath("") + "cache.properties";
-		if (config.containsKey("cache.config")) {
-			cacheConfigFile = config.get("cache.config");
+		if (sessionConfigMap.containsKey("cache.config")) {
+			cacheConfigFile = sessionConfigMap.get("cache.config");
 		}
-		CacheConfiguration cacheConfig = CacheConfiguration.getConfig(config);
+		
+		ConfigMap<String, String> cacheConfigMap = ConfigMap.load(new File(cacheConfigFile));
+		CacheConfiguration cacheConfig = CacheConfiguration.build(cacheConfigMap);
+		
 		try {
 			if (cacheConfig != null) {
+				
 				String cacheName = this.toString();
+				if (cacheConfigMap.containsKey("cache.name")) {
+					cacheName = cacheConfigMap.get("cache.name");
+				}
+				
 				this.cache = CacheFactory.getInstance().createCache(cacheName, cacheConfig);
+				
 				logger.info(String.format("Cache create successful: max_size=%d, expire=%d", 
 						cacheConfig.getMaxHeapSize(), cacheConfig.getExpire()));
 			} else {
@@ -93,12 +112,12 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	private void createInstance() throws IOException {
-		String type = config.get("type");
+		String type = sessionConfigMap.get("type");
 		if (type != null) {
 			if (type.equalsIgnoreCase("c3p0")) {
-				datasource = new C3p0DataSource(config);
+				datasource = new C3p0DataSource(sessionConfigMap);
 			} else if (type.equalsIgnoreCase("jdbc")) {
-				datasource = new JdbcDataSource(config);
+				datasource = new JdbcDataSource(sessionConfigMap);
 			} else {
 				throw new IOException(String.format("Unknow datasource type : %s", type));
 			}
@@ -118,7 +137,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		if (datasource != null) {
 			Connection conn = datasource.getConnection();
 			if (conn != null) {
-				boolean autoCommit = config.getBoolean("auto_commit", true);
+				boolean autoCommit = sessionConfigMap.getBoolean("auto_commit", true);
 				try {
 					conn.setAutoCommit(autoCommit);
 				} catch (SQLException e) {
@@ -139,7 +158,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		// 数据库驱动关键字
 		String driverKeywords[] = { DBType.MYSQL, DBType.ORACLE, DBType.SQLITE };
 		// 数据库驱动类
-		String driver = this.config.get("driver");
+		String driver = this.sessionConfigMap.get("driver");
 
 		String dbType = null;
 		if (StringUtils.isNotBlank(driver)) {
