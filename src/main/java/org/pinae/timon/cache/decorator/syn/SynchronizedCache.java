@@ -52,7 +52,7 @@ public class SynchronizedCache extends AbstractCache {
 			}
 			cacheObjectList = cacheObjectList.subList(0, end);
 		}
-		Collections.sort(cacheObjectList, config.getAlgorithm());
+		Collections.sort(cacheObjectList, config.getEvictionPolicy());
 
 		return cacheObjectList;
 	}
@@ -62,7 +62,7 @@ public class SynchronizedCache extends AbstractCache {
 	 */
 	private boolean checkOverFlow() {
 		// 检查长度是否越界
-		if (config.getMaxHeapSize() > 0 && info.getSize() == config.getMaxHeapSize()) {
+		if (config.getMaxHeapSize() > 0 && info.getSize() >= config.getMaxHeapSize()) {
 			return true;
 		}
 
@@ -85,7 +85,7 @@ public class SynchronizedCache extends AbstractCache {
 
 			if (cacheObjectList != null && cacheObjectList.size() > 0) {
 				CacheObject cacheObject = (CacheObject) cacheObjectList.get(0);
-				cache.remove(cacheObject.getKey());
+				remove(cacheObject.getKey());
 			}
 		}
 	}
@@ -172,6 +172,8 @@ public class SynchronizedCache extends AbstractCache {
 	public synchronized void clear() {
 		cache.clear();
 		info.setSizeToZero();
+		
+		logger.info("Clear Cache:" + info.getName());
 	}
 
 	public void close() {

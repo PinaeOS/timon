@@ -1,10 +1,10 @@
 package org.pinae.timon.cache.decorator.syn;
 
 import org.pinae.timon.cache.CacheConfiguration;
-import org.pinae.timon.cache.decorator.syn.algorithm.Algorithm;
-import org.pinae.timon.cache.decorator.syn.algorithm.FIFOAlgorithm;
-import org.pinae.timon.cache.decorator.syn.algorithm.LFUAlgorithm;
-import org.pinae.timon.cache.decorator.syn.algorithm.LRUAlgorithm;
+import org.pinae.timon.cache.decorator.syn.eviction.EvictionPolicy;
+import org.pinae.timon.cache.decorator.syn.eviction.FIFOEvictionPolicy;
+import org.pinae.timon.cache.decorator.syn.eviction.LFUEvictionPolicy;
+import org.pinae.timon.cache.decorator.syn.eviction.LRUEvictionPolicy;
 import org.pinae.timon.util.ConfigMap;
 
 /**
@@ -15,7 +15,7 @@ import org.pinae.timon.util.ConfigMap;
  */
 public final class SynchronizedCacheConfiguration extends CacheConfiguration {
 
-	private Algorithm algorithm = new LFUAlgorithm(); // 清理算法
+	private EvictionPolicy evictionPolicy = new LFUEvictionPolicy(); // 对象回收策略
 	
 	private int sortLength = 10000; // 排序长度, 0: 全部进行排序
 
@@ -34,13 +34,14 @@ public final class SynchronizedCacheConfiguration extends CacheConfiguration {
 	 */
 	public SynchronizedCacheConfiguration(ConfigMap<String, String> config) {
 		super(config);
-		String algorithm = config.getString("cache.syn.algorithm", "lfu").toLowerCase();
+		String algorithm = config.getString("cache.syn.eviction", "lfu").toLowerCase();
+		
 		if (algorithm.equals("lru")) {
-			this.algorithm = new LRUAlgorithm();
+			this.evictionPolicy = new LRUEvictionPolicy();
 		} else if (algorithm.equals("fifo")) {
-			this.algorithm = new FIFOAlgorithm();
+			this.evictionPolicy = new FIFOEvictionPolicy();
 		} else {
-			this.algorithm = new LFUAlgorithm();
+			this.evictionPolicy = new LFUEvictionPolicy();
 		}
 		this.sortLength = config.getInteger("cache.syn.sort_length", 100000);
 	}
@@ -50,8 +51,8 @@ public final class SynchronizedCacheConfiguration extends CacheConfiguration {
 	 * 
 	 * @return 缓存清理策略
 	 */
-	public Algorithm getAlgorithm() {
-		return algorithm;
+	public EvictionPolicy getEvictionPolicy() {
+		return evictionPolicy;
 	}
 
 	/**
@@ -59,8 +60,8 @@ public final class SynchronizedCacheConfiguration extends CacheConfiguration {
 	 * 
 	 * @param algorithm 缓存清理策略
 	 */
-	public void setAlgorithm(Algorithm algorithm) {
-		this.algorithm = algorithm;
+	public void setEvictionPolicy(EvictionPolicy algorithm) {
+		this.evictionPolicy = algorithm;
 	}
 
 	/**
