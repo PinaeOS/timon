@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.pinae.timon.cache.CacheObject;
+import org.pinae.timon.cache.decorator.syn.eviction.LRUEvictionPolicy;
 import org.pinae.timon.util.MessageDigestUtils;
 
 public class LRUAlgorithmTest {
@@ -29,7 +30,7 @@ public class LRUAlgorithmTest {
 		
 		long start = System.currentTimeMillis();
 		
-		Collections.sort(objList, new LRUAlgorithm());
+		Collections.sort(objList, new LRUEvictionPolicy());
 		
 		logger.info("LRU sort Used:" + Long.toString(System.currentTimeMillis() - start) + " ms");
 	}
