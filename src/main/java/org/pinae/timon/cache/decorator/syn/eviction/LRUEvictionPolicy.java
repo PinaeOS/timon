@@ -1,21 +1,21 @@
-package org.pinae.timon.cache.decorator.syn.algorithm;
+package org.pinae.timon.cache.decorator.syn.eviction;
 
 import org.pinae.timon.cache.CacheObject;
 
 /**
- * 先入先出缓存清理策略
+ * 最后使用缓存清理策略
  * 
  * @author Huiyugeng
  *
  */
-public class FIFOAlgorithm implements Algorithm {
+public class LRUEvictionPolicy implements EvictionPolicy {
 
 	public int compare(CacheObject o1, CacheObject o2) {
 
-		if (o1.getCreateTime().getTime() < o2.getCreateTime().getTime()) {
+		if (o1.getLastAccessTime().getTime() < o2.getLastAccessTime().getTime()) {
 			return -1;
 		} else {
-			if (o1.getCreateTime().getTime() == o2.getCreateTime().getTime()) {
+			if (o1.getLastAccessTime().getTime() == o2.getLastAccessTime().getTime()) {
 				if (o1.getId() < o2.getId()) {
 					return -1;
 				} else {

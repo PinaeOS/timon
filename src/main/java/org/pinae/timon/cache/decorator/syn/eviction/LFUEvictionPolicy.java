@@ -1,4 +1,4 @@
-package org.pinae.timon.cache.decorator.syn.algorithm;
+package org.pinae.timon.cache.decorator.syn.eviction;
 
 import org.pinae.timon.cache.CacheObject;
 
@@ -8,7 +8,7 @@ import org.pinae.timon.cache.CacheObject;
  * @author Huiyugeng
  *
  */
-public class LFUAlgorithm implements Algorithm {
+public class LFUEvictionPolicy implements EvictionPolicy {
 
 	public int compare(CacheObject o1, CacheObject o2) {
 		CacheObject co1 = (CacheObject) o1;

@@ -1,4 +1,4 @@
-package org.pinae.timon.cache.decorator.syn.algorithm;
+package org.pinae.timon.cache.decorator.syn.eviction;
 
 import java.util.Comparator;
 
@@ -9,6 +9,6 @@ import org.pinae.timon.cache.CacheObject;
  * @author Huiyugeng
  *
  */
-public interface Algorithm extends Comparator<CacheObject> {
+public interface EvictionPolicy extends Comparator<CacheObject> {
 
 }
