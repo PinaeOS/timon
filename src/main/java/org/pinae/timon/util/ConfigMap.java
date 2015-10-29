@@ -1,6 +1,7 @@
 package org.pinae.timon.util;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,16 +94,26 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 		}
 	}
 	
-	public static ConfigMap<String, String> loadFromFile(String filename) throws IOException {
+	public static ConfigMap<String, String> load(File file) throws IOException {
 		
-		ConfigMap<String, String> configMap = new ConfigMap<String, String>();
+		if (file == null) {
+			throw new IOException("Properties file is NULL");
+		}
+		
+		if (!file.exists() || !file.isFile()) {
+			throw new IOException(file.getAbsolutePath() + " is NOT exists or NOT a file");
+		}
+		
+		ConfigMap<String, String> configMap = null;
 		
 		try {
 			Properties properties = new Properties();
-
-			InputStream in = new BufferedInputStream(new FileInputStream(filename));
+			// 读取Properties配置文件
+			InputStream in = new BufferedInputStream(new FileInputStream(file));
 			properties.load(in);
 
+			configMap = new ConfigMap<String, String>();
+			
 			Set<Object> propKeySet = properties.keySet();
 			for (Object propKey : propKeySet) {
 				if (propKeySet != null) {
@@ -115,7 +126,7 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 			IOUtils.closeQuietly(in);
 
 		} catch (Exception e) {
-			throw new IOException(String.format("Read %s error : %s", filename, e.getMessage()));
+			throw new IOException(String.format("Read %s error : %s", file.getAbsolutePath(), e.getMessage()));
 		}
 		
 		return configMap;
