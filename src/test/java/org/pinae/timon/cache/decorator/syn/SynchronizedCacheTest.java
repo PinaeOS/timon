@@ -1,6 +1,9 @@
 package org.pinae.timon.cache.decorator.syn;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.pinae.timon.cache.Cache;
@@ -34,14 +37,39 @@ public class SynchronizedCacheTest extends KVCacheTestCase {
 	
 	@Test
 	public void testCache() throws CacheException {
-		super.testBasicCache(cache);
-		cache.close();
+		super.testBasicCache(cache, true);
 	}
 	
 	@Test
 	public void testOverFlow() throws CacheException {
 		super.testOverFlow(cache);
-		cache.close();
+	}
+	
+	@Test
+	public void testPut() throws CacheException {
+		
+		cache.getCacheConfig().setMaxHeapSize(10000);
+		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		
+		cache.clear();
+		
+		cache.getCacheConfig().setMaxHeapSize(20000);
+		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		
+		cache.clear();
+		
+		cache.getCacheConfig().setMaxHeapSize(30000);
+		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		
+		cache.clear();
+		
+		cache.getCacheConfig().setMaxHeapSize(40000);
+		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+	}
+	
+	@After
+	public void after() throws CacheException {
+		this.cache.close();
 	}
 
 }

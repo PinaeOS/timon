@@ -33,7 +33,7 @@ public class EhCacheTest extends KVCacheTestCase {
 
 	@Test
 	public void testCache() throws CacheException {
-		super.testBasicCache(cache);
+		super.testBasicCache(cache, true);
 		cache.close();
 	}
 	

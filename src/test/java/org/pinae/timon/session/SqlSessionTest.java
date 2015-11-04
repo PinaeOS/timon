@@ -54,11 +54,63 @@ public class SqlSessionTest {
 		logger.info("Create New Session:" + this.session.getConnection().toString());
 	}
 	
+	@Test
+	public void testSelect() {
+		List<Object[]> table = (List<Object[]>) session.select(builder.getSQLByName("GET_PERSON_1"));
+		assertEquals(table.size(), 3); // 用户数量测试
+		assertEquals(table.get(0)[0], 1); // 用户编号测试
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSelectForMap() {
-		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_ID"), Map.class);
-		assertEquals(table.size(), 3);
+		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_PERSON_1"), Map.class);
+		assertEquals(table.size(), 3); // 用户数量测试
+		assertEquals(table.get(0).get("id"), 1); // 用户编号测试
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSelectForObject() {
+		List<Person> table = (List<Person>) session.select(builder.getSQLByName("GET_PERSON_1"), Person.class);
+		assertEquals(table.size(), 3); // 用户数量测试
+		assertEquals(table.get(0).getId(), 1); // 用户编号测试
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSelectForAnnotation() {
+		List<AnnotationPerson> table = (List<AnnotationPerson>) session.select(builder.getSQLByName("GET_PERSON_1"), AnnotationPerson.class);
+		assertEquals(table.size(), 3); // 用户数量测试
+		assertEquals(table.get(0).getUserId(), 1); // 用户编号测试
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSelectWithHandler() {
+		// 当数据返回数量为3条时, 在获取的列表中删除第一个元素(id=1)
+		ResultHandler handler = new ResultHandler() {
+			@SuppressWarnings("rawtypes")
+			public <T> void handle(T t) {
+				if (t instanceof List) {
+					List dataList = (List)t;
+					if (dataList.size() == 3) {
+						dataList.remove(0);
+					}
+				}
+			}
+		};
+		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_ID"), 
+				Map.class, handler);
+		assertEquals(table.size(), 2);
+		assertEquals(table.get(0).get("id"), 2); // 用户编号测试
+	}
+	
+	@Test
+	public void testOne() {
+		Object[] row = session.one(builder.getSQLByName("GET_ID"));
+		assertEquals(row.length, 1);
+		assertEquals(row[0], 1); // 用户编号测试
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -83,25 +135,7 @@ public class SqlSessionTest {
 		AnnotationPerson person = (AnnotationPerson)session.one(builder.getSQLByNameWithParameters("GET_PERSON_2", parameters), AnnotationPerson.class);
 		assertNotNull(person.getUserName());
 	}
-	
-	@SuppressWarnings("unchecked")
-	public void testSelectWithHandler() {
-		ResultHandler handler = new ResultHandler() {
-			@SuppressWarnings("rawtypes")
-			public <T> void handle(T t) {
-				if (t instanceof List) {
-					List dataList = (List)t;
-					if (dataList.size() == 3) {
-						dataList.remove(0);
-					}
-				}
-			}
-		};
-		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_ID"), 
-				Map.class, handler);
-		assertEquals(table.size(), 2);
-	}
-	
+
 	@Test
 	public void testOneForAnnotationWithHandler() {
 		ResultHandler handler = new ResultHandler() {
@@ -119,9 +153,22 @@ public class SqlSessionTest {
 		assertEquals(person.getUserName(), "Timon");
 	}
 	
+	@Test
+	public void testGetColumnsBySql() {
+		String[] columns = session.getColumnsBySql(builder.getSQLByName("GET_PERSON_1"));
+		assertEquals(columns.length, 4);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testCache() throws InterruptedException {
+		/* 
+		 * 在获取的列表(3条数据)中删除第一个元素, 缓存的数据应为2条, 
+		 * 因此重新执行GET_USER_INFO_WITH_CACHE中的SQL, 即便没有加入ResultHandle, 
+		 * 但是由于数据从缓存中获取, 因此获得的数据数量也是2条,
+		 * 在SQL缓存过期后, 重新执行GET_USER_INFO_WITH_CACHE的SQL, 
+		 * 在没有ResultHandle的情况下数据数量为3条
+		*/
 		ResultHandler handler = new ResultHandler() {
 			@SuppressWarnings("rawtypes")
 			public <T> void handle(T t) {
@@ -134,7 +181,7 @@ public class SqlSessionTest {
 			}
 		};
 		
-		String sql = builder.getSQLByName("org.timon.test.cache.GET_USER_INFO");
+		String sql = builder.getSQLByName("org.timon.test.cache.GET_USER_INFO_WITH_CACHE");
 		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(sql, Map.class, handler);
 		assertEquals(table.size(), 2);
 
