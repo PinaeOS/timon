@@ -18,7 +18,9 @@ public class ObjectUtils {
 	 * 从字节数组转变为对象
 	 * 
 	 * @param objBytes 字节数组
-	 * @return 对象
+	 * 
+	 * @return 字节转换后的对象
+	 * 
 	 * @throws Exception 异常处理
 	 */
 	public static Object getObjectFromBytes(byte[] objBytes) throws Exception {
@@ -33,8 +35,10 @@ public class ObjectUtils {
 	/**
 	 * 从对象转变为字节数组
 	 * 
-	 * @param obj 对象
+	 * @param obj 需要转换的对象
+	 * 
 	 * @return 字节数组
+	 * 
 	 * @throws IOException 异常处理
 	 */
 	public static byte[] getBytes(Object obj) throws IOException {
