@@ -54,6 +54,4 @@ public interface SqlSession {
 	public boolean isClosed();
 
 	public String[] getColumnsBySql(String sql);
-
-	public String getDbType();
 }

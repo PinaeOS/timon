@@ -20,6 +20,7 @@ import org.pinae.timon.session.executor.SqlExecutor;
 import org.pinae.timon.session.executor.SqlMetadata;
 import org.pinae.timon.session.handle.ResultHandler;
 import org.pinae.timon.sql.SqlBuilder;
+import org.pinae.timon.util.ConfigMap;
 import org.pinae.timon.util.MessageDigestUtils;
 
 /**
@@ -35,15 +36,24 @@ public class DefaultSqlSession implements SqlSession {
 	private SqlExecutor executor;
 	private SqlMetadata metadata;
 
-	private String dbType;
-
 	private Cache cache;
+	
+	private ConfigMap<String, String> sessionConfig;
 
-	public DefaultSqlSession(String dbType, Connection conn, Cache cache) throws IOException {
-		this.dbType = dbType;
+	/**
+	 * 构造函数
+	 * 
+	 * @param conn 数据库连接
+	 * @param cache SQL缓存
+	 * @param config 数据库配置信息
+	 * 
+	 * @throws IOException IO异常
+	 */
+	public DefaultSqlSession(Connection conn, Cache cache, ConfigMap<String, String> sessionConfig) throws IOException {
+		
 		this.connection = conn;
-
 		this.cache = cache;
+		this.sessionConfig = sessionConfig;
 
 		if (conn != null) {
 			this.executor = new SqlExecutor(conn);
@@ -78,10 +88,7 @@ public class DefaultSqlSession implements SqlSession {
 	}
 
 	public Object[] one(String sql) {
-		return one(sql, new ResultHandler() {
-			public <T> void handle(T t) {
-			}
-		});
+		return one(sql, (ResultHandler)null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -119,36 +126,46 @@ public class DefaultSqlSession implements SqlSession {
 	}
 
 	public List<Object[]> select(String sql) {
-		return select(sql, new ResultHandler() {
-			public <T> void handle(T t) {
-			}
-		});
+		return select(sql, (ResultHandler)null);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Object[]> select(String sql, ResultHandler handler) {
-		List<Object[]> result = null;
+		
+		if (StringUtils.isBlank(sql)) {
+			throw new NullPointerException("SQL is NULL");
+		}
+		
+		List<Object[]> queryResult = null;
 		
 		try {
 			String sqlKey = MessageDigestUtils.MD5(sql);
 			
-			boolean enableCache = true;
-			Map<String, String> comment = parseSqlComment(sql);
-			if ("FALSE".equals(comment.get("CACHE"))){
-				enableCache = false;
-			}
-			if (this.cache != null && enableCache == true) {
-				result = (List<Object[]>)this.cache.get(sqlKey);
+			boolean isCacheSql = true;
+
+			// 检查Session配置文件中缓存禁止缓存结果
+			if ("DISABLE".equals(this.sessionConfig.getString("cache.sql", "ENABLE"))) {
+				isCacheSql = false;
 			}
 			
-			if (result == null) {
-				result = this.executor.select(sql);
+			// 检查SQL语句中禁止缓存结果
+			Map<String, String> comment = parseSqlComment(sql);
+			if ("FALSE".equals(comment.get("CACHE"))){
+				isCacheSql = false;
+			}
+			
+			if (this.cache != null && isCacheSql == true) {
+				queryResult = (List<Object[]>)this.cache.get(sqlKey);
+			}
+			
+			if (queryResult == null) {
+				queryResult = this.executor.select(sql);
 				
 				if (handler != null) {
-					handler.handle(result);
+					handler.handle(queryResult);
 				}
 				
-				if (this.cache != null && enableCache == true) {
+				if (this.cache != null && isCacheSql == true) {
 					int expire = -1;
 					if (StringUtils.isNumeric(comment.get("CACHE"))) {
 						try {
@@ -157,13 +174,17 @@ public class DefaultSqlSession implements SqlSession {
 							expire = -1;
 						}
 					}
-					this.cache.put(sqlKey, result, expire);
+					if (expire > 0) {
+						this.cache.put(sqlKey, queryResult, expire);
+					} else {
+						this.cache.put(sqlKey, queryResult);
+					}
 				}
 			}
 		} catch (CacheException e) {
 			
 		}
-		return result;
+		return queryResult;
 	}
 
 	public List<?> select(String sql, String[] columns, Class<?> clazz, ResultHandler handler) {
@@ -271,10 +292,6 @@ public class DefaultSqlSession implements SqlSession {
 			return metadata.getColumnsBySql(sql);
 		}
 		return null;
-	}
-
-	public String getDbType() {
-		return dbType;
 	}
 	
 	private Map<String, String> parseSqlComment(String sql) {

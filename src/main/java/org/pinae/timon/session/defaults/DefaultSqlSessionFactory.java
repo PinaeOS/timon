@@ -97,8 +97,11 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 				String cacheName = this.toString();
 				if (cacheConfigMap.containsKey("cache.name")) {
 					cacheName = cacheConfigMap.get("cache.name");
+					if (StringUtils.isBlank(cacheName)) {
+						cacheName = this.toString();
+					}
 				}
-				
+
 				this.cache = CacheFactory.getInstance().createCache(cacheName, cacheConfig);
 				
 				logger.info(String.format("Cache create successful: max_size=%d, expire=%d", 
@@ -112,6 +115,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	private void createInstance() throws IOException {
+		// 构建数据源 (jdbc/c3p0)
 		String type = sessionConfigMap.get("type");
 		if (type != null) {
 			if (type.equalsIgnoreCase("c3p0")) {
@@ -122,7 +126,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 				throw new IOException(String.format("Unknow datasource type : %s", type));
 			}
 		} else {
-			throw new IOException("Datasource type is NULL");
+			throw new NullPointerException("Datasource type is NULL");
 		}
 		
 		// 构建缓存
@@ -148,18 +152,19 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 					handler.handle(conn);
 				}
 
-				return new DefaultSqlSession(getDBType(), conn, this.cache);
+				return new DefaultSqlSession(conn, this.cache, sessionConfigMap);
 			}
 		}
 		return null;
 	}
 
-	private String getDBType() {
+	public String getDBType() {
 		// 数据库驱动关键字
 		String driverKeywords[] = { DBType.MYSQL, DBType.ORACLE, DBType.SQLITE };
 		// 数据库驱动类
 		String driver = this.sessionConfigMap.get("driver");
 
+		// 通过比对数据库驱动类中的关键字判断数据库类型
 		String dbType = null;
 		if (StringUtils.isNotBlank(driver)) {
 			for (String keyword : driverKeywords) {
