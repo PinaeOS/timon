@@ -3,6 +3,7 @@ package org.pinae.timon.cache;
 import java.io.File;
 import java.io.IOException;
 
+import org.pinae.timon.cache.decorator.memcached.MemcachedCacheConfiguration;
 import org.pinae.timon.cache.decorator.syn.SynchronizedCacheConfiguration;
 import org.pinae.timon.cache.decorators.ehcache.EhCacheConfiguration;
 import org.pinae.timon.util.ClassLoaderUtils;
@@ -16,8 +17,8 @@ import org.pinae.timon.util.ConfigMap;
  */
 public abstract class CacheConfiguration {
 	
-	private static int BYTE = 1;
-	private static int KB = 1024 * BYTE;
+	private static int ONE_BYTE = 1;
+	private static int ONE_KB = 1024 * ONE_BYTE;
 
 	private int expire = 3600; // 缓存对象超时时间(s), 0: 永不过期
 
@@ -45,8 +46,8 @@ public abstract class CacheConfiguration {
 		
 		this.expire = config.getInteger("cache.expire", 600);
 		this.maxHeapSize = config.getInteger("cache.heap_max_size", 0);
-		this.maxMemorySize = config.getLong("cache.memory_max_size", 0) * KB;
-		this.maxObjectSize = config.getLong("cache.object_max_size", 0) * KB;
+		this.maxMemorySize = config.getLong("cache.memory_max_size", 0) * ONE_KB;
+		this.maxObjectSize = config.getLong("cache.object_max_size", 0) * ONE_KB;
 	}
 
 	/**
@@ -103,7 +104,7 @@ public abstract class CacheConfiguration {
 		if (maxMemorySize < 0) {
 			maxMemorySize = 0;
 		}
-		this.maxMemorySize = maxMemorySize * KB;
+		this.maxMemorySize = maxMemorySize * ONE_KB;
 	}
 
 	/**
@@ -124,7 +125,7 @@ public abstract class CacheConfiguration {
 		if (objectSize < 0) {
 			objectSize = 0;
 		}
-		this.maxObjectSize = objectSize * KB;
+		this.maxObjectSize = objectSize * ONE_KB;
 	}
 	
 	/**
@@ -173,6 +174,8 @@ public abstract class CacheConfiguration {
 				return new SynchronizedCacheConfiguration(cacheConfigMap);
 			} else if (cacheAdapter.equals("EHCACHE")) {
 				return new EhCacheConfiguration(cacheConfigMap);
+			} else if (cacheAdapter.equals("MEMCACHED")) {
+				return new MemcachedCacheConfiguration(cacheConfigMap);
 			}
 		}
 		return null;

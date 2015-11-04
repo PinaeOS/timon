@@ -16,7 +16,11 @@ public interface Cache {
 	 * Ehcache缓存
 	 */
 	public static final int EHCACHE_CACHE = 1;
-
+	
+	/**
+	 * Memcached缓存
+	 */
+	public static final int MEMCACHED_CACHE = 2;
 	
 	/**
 	 * 获取缓存信息
@@ -33,7 +37,7 @@ public interface Cache {
 	public CacheConfiguration getCacheConfig();
 	
 	/**
-	 * 将需要缓存的值和对应的名称加入到缓存中
+	 * 将需要缓存的键和值加入到缓存中
 	 * 
 	 * @param key 缓存名称
 	 * @param object 缓存的值
@@ -41,7 +45,7 @@ public interface Cache {
 	public void put(String key, Object object) throws CacheException;
 	
 	/**
-	 * 将需要缓存的值和对应的名称加入到缓存中
+	 * 将需要缓存的键和值加入到缓存中, 并设置缓存对象超时时间
 	 * 
 	 * @param key 缓存名称
 	 * @param object 缓存的值

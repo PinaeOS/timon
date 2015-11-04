@@ -3,6 +3,8 @@ package org.pinae.timon.cache;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.pinae.timon.cache.decorator.memcached.MemcachedCache;
+import org.pinae.timon.cache.decorator.memcached.MemcachedCacheConfiguration;
 import org.pinae.timon.cache.decorator.syn.SynchronizedCache;
 import org.pinae.timon.cache.decorator.syn.SynchronizedCacheConfiguration;
 import org.pinae.timon.cache.decorators.ehcache.EhCache;
@@ -60,6 +62,9 @@ public class CacheFactory {
 		case Cache.EHCACHE_CACHE:
 			cache = new EhCache(name, (EhCacheConfiguration) config);
 			break;
+		case Cache.MEMCACHED_CACHE:
+			cache = new MemcachedCache(name, (MemcachedCacheConfiguration)config);
+			break;
 		}
 
 		if (name != null && cache != null) {
@@ -108,6 +113,8 @@ public class CacheFactory {
 		
 		if (config instanceof EhCacheConfiguration) {
 			type = Cache.EHCACHE_CACHE;
+		} else if (config instanceof MemcachedCacheConfiguration) {
+			type = Cache.MEMCACHED_CACHE;
 		}
 		return createCache(name, config, type);
 	}
