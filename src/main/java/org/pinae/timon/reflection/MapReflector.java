@@ -68,6 +68,7 @@ public class MapReflector implements Reflector {
 		return resultList;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T toObject(Object[] row, String[] columns) {
 		Map<String, Object> result = new HashMap<String, Object>();
 		for (int i = 0; i < columns.length; i++) {

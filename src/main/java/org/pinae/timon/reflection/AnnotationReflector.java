@@ -31,43 +31,51 @@ public class AnnotationReflector implements Reflector {
 		return table;
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> T toObject(Object[] row, String[] columns) {
 		
 		Object object = null;
 		
-		try {
-			Map<String, Object> data = new HashMap<String, Object>();
-			
-			if (columns != null && row != null) {
-				for (int i = 0 ; i < columns.length; i++) {
-					String column = columns[i];
-					Object value = null;
-					try {
-						value = row[i];
-					} catch (ArrayIndexOutOfBoundsException e) {
-						
-					}
+		
+		Map<String, Object> data = new HashMap<String, Object>();
+		
+		if (columns != null && row != null) {
+			for (int i = 0 ; i < columns.length; i++) {
+				String column = columns[i];
+				Object value = null;
+				try {
+					value = row[i];
+				} catch (ArrayIndexOutOfBoundsException e) {
 					
-					data.put(column, value);
 				}
 				
-				object = clazz.newInstance();
-				
-				Field[] fields = clazz.getDeclaredFields();
-				for (Field field : fields) {
-					if(field.isAnnotationPresent(Column.class)) {
-						Column column = (Column)field.getAnnotation(Column.class);
-						field.setAccessible(true);
-						field.set(object, data.get(column.name()));
-					}
-				}
-			} else {
-				
+				data.put(column, value);
 			}
 			
-		} catch (Exception e) {
-			log.error(String.format("AnnotationReflector Exception: exception=%s", e.getMessage()));
+			try {
+				object = clazz.newInstance();
+			} catch (Exception e) {
+				log.error("Instance class exception: " + e.getMessage());
+			}
+			
+			Field[] fields = clazz.getDeclaredFields();
+			for (Field field : fields) {
+				if(field.isAnnotationPresent(Column.class)) {
+					Column column = (Column)field.getAnnotation(Column.class);
+					
+					if (data.containsKey(column.name())) {
+						try {
+							field.setAccessible(true);
+							field.set(object, data.get(column.name()));
+						} catch (Exception e) {
+							log.error("set field value exception: " + e.getMessage());
+						}
+					}
+				}
+			}
 		}
+			
+		
 
 		return (T) object;
 	}

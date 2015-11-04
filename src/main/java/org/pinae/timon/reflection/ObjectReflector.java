@@ -32,18 +32,22 @@ public class ObjectReflector implements Reflector {
 	@SuppressWarnings("unchecked")
 	public <T> T toObject(Object[] row, String[] columns) {
 		Object object = null;
+		
 		try {
 			object = clazz.newInstance();
-			
-			for (int i = 0; i < columns.length; i++) {
-				String columnName = (String) columns[i];
-
+		} catch (Exception e) {
+			log.error("Instance class exception: " + e.getMessage());
+		}
+		
+		for (int i = 0; i < columns.length; i++) {
+			String columnName = (String) columns[i];
+			try {
 				Field field = clazz.getDeclaredField(columnName);
 				field.setAccessible(true);
 				field.set(object, row[i]);
+			} catch (Exception e) {
+				log.error("set field value exception: " + e.getMessage());
 			}
-		} catch (Exception e) {
-			log.error(String.format("ObjectReflector Exception: exception=%s", e.getMessage()));
 		}
 
 		return (T) object;
