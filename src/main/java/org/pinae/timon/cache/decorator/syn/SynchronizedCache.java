@@ -96,10 +96,10 @@ public class SynchronizedCache extends AbstractCache {
 
 	public synchronized void put(String key, Object value, int expire) {
 		if (key == null) {
-			throw new NullPointerException("cache key can't be null");
+			throw new NullPointerException("cache key can't be NULL");
 		}
 		if (value == null) {
-			throw new NullPointerException("cache value can't be null");
+			throw new NullPointerException("cache value can't be NULL");
 		}
 		
 		// 向缓存中增加缓存对象
