@@ -67,13 +67,14 @@ public class EhCache extends AbstractCache {
 		put(key, value, this.config.getExpire());
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void put(String key, Object value, int expire) throws CacheException {
 		
 		if (key == null) {
-			throw new NullPointerException("cache key can't be null");
+			throw new NullPointerException("cache key can't be NULL");
 		}
 		if (value == null) {
-			throw new NullPointerException("cache value can't be null");
+			throw new NullPointerException("cache value can't be NULL");
 		}
 		
 		if (key != null && value != null) {
@@ -115,6 +116,7 @@ public class EhCache extends AbstractCache {
 		return value;
 	}
 
+	@SuppressWarnings("deprecation")
 	public boolean remove(String key) throws CacheException {
 		if (key != null) {
 			

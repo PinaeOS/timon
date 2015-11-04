@@ -31,7 +31,7 @@ public class EhCacheConfiguration extends CacheConfiguration {
 	public EhCacheConfiguration(ConfigMap<String, String> config) {
 		super(config);
 		
-		this.configUrl = config.get("cache.ehcache.config_url");
+		this.configUrl = config.get("cache.ehcache.url");
 		this.evictionPolicy = config.getString("cache.ehcache.eviction", "LFU").toUpperCase();
 	}
 
