@@ -87,7 +87,7 @@ public class MemcachedCache extends AbstractCache {
 			} else {
 				client.replace(key, expire, value);
 			}
-			info.incPuts();
+			info.incPuts(false);
 		} catch (TimeoutException e) {
 			throw new CacheException(e);
 		} catch (InterruptedException e) {

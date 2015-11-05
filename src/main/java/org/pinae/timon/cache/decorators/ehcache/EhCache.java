@@ -88,8 +88,8 @@ public class EhCache extends AbstractCache {
 			if (config.getMaxObjectSize() == 0 || objectSize <= config.getMaxObjectSize()) {
 				cache.put(element);
 				
-				info.incPuts();
-				info.setSize(cache.getSize());
+				info.incPuts(true);
+				info.setSize(cache.getSize()); // 重新修正缓存对象数量
 				info.setMemorySize(cache.getMemoryStoreSize());
 			} else {
 				logger.info(String.format("Object size over max_object_size : key=%s, object_size=%d, max_object_size=%d", 
