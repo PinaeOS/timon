@@ -84,10 +84,11 @@ public class MemcachedCache extends AbstractCache {
 		try {
 			if (client.get(key) == null) {
 				client.set(key, expire, value);
+				info.incPuts(true);
 			} else {
 				client.replace(key, expire, value);
+				info.incPuts(false);
 			}
-			info.incPuts(false);
 		} catch (TimeoutException e) {
 			throw new CacheException(e);
 		} catch (InterruptedException e) {
