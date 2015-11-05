@@ -36,8 +36,10 @@ public class CacheInformation {
 		this.misses++;
 	}
 
-	public void incPuts() {
-		this.size++;
+	public void incPuts(boolean incSize) {
+		if (incSize) {
+			this.size++;
+		}
 		this.totlePuts++;
 	}
 

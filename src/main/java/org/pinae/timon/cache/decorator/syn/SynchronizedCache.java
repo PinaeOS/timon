@@ -112,11 +112,19 @@ public class SynchronizedCache extends AbstractCache {
 			// 执行缓存清理
 			clean();
 			
+			CacheObject replaceObject = cache.get(key);
+			
 			// 缓存对象加入缓存中
 			cache.put(key, cacheObject);
-			
-			info.incPuts();
+
+			if (replaceObject != null) {
+				info.incPuts(false); //如果非替换模式, 仅增长totalPuts
+				info.minusMemorySize(replaceObject.getSize());
+			} else {
+				info.incPuts(true);
+			}
 			info.addMemorySize(objectSize);
+			
 
 		} else {
 			logger.info(String.format("Object size over max_object_size : key=%s, object_size=%d, max_object_size=%d", 
