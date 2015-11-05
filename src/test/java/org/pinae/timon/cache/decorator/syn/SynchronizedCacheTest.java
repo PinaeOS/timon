@@ -1,7 +1,5 @@
 package org.pinae.timon.cache.decorator.syn;
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
@@ -49,22 +47,22 @@ public class SynchronizedCacheTest extends KVCacheTestCase {
 	public void testPut() throws CacheException {
 		
 		cache.getCacheConfig().setMaxHeapSize(10000);
-		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		super.testPut(cache, 40000, 1024);
 		
 		cache.clear();
 		
 		cache.getCacheConfig().setMaxHeapSize(20000);
-		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		super.testPut(cache, 40000, 1024);
 		
 		cache.clear();
 		
 		cache.getCacheConfig().setMaxHeapSize(30000);
-		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		super.testPut(cache, 40000, 1024);
 		
 		cache.clear();
 		
 		cache.getCacheConfig().setMaxHeapSize(40000);
-		super.testPut(cache, 40000, 1024, TimeUnit.SECONDS.toMillis(10));
+		super.testPut(cache, 40000, 1024);
 	}
 	
 	@After

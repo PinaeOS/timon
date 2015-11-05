@@ -54,6 +54,7 @@ public class KVCacheTestCase {
 		// 测试Replace
 		cache.put("age", "31");
 		assertEquals(cache.getCacheInfo().getTotalPuts(), 4);
+		assertEquals(cache.getCacheInfo().getSize(), 3);
 		assertEquals(cache.get("age"), "31");
 		
 		// 测试Remove
@@ -83,7 +84,7 @@ public class KVCacheTestCase {
 		assertEquals(cache.getCacheInfo().getSize(), cacheSize);
 	}
 	
-	public void testPut(Cache cache, long cacheSize, int objectSize, long expectUsedTime) throws CacheException {
+	public void testPut(Cache cache, long cacheSize, int objectSize) throws CacheException {
 		long start = System.currentTimeMillis();
 		for (long i = 0 ; i < cacheSize; i++) {
 			cache.put(Long.toString(i), new Byte[objectSize]);

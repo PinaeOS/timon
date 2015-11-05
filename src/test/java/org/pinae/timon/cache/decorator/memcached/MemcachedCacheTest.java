@@ -1,7 +1,6 @@
 package org.pinae.timon.cache.decorator.memcached;
 
 import org.apache.log4j.Logger;
-import org.junit.Before;
 import org.junit.Test;
 import org.pinae.timon.cache.Cache;
 import org.pinae.timon.cache.CacheException;
@@ -21,24 +20,31 @@ public class MemcachedCacheTest extends KVCacheTestCase {
 
 	private Cache cache;
 	
-	private String memcachedServer = "localhost:11211";
+	private String memcachedServer = "192.168.228.132:11211";
 	
-	@Before
-	public void before() throws CacheException {
+	public void createCache(int size) throws CacheException {
 		MemcachedCacheConfiguration config = new MemcachedCacheConfiguration();
 		
 		config.setServer(memcachedServer);
 		
 		config.setExpire(0);
-		config.setMaxHeapSize(10);
+		config.setMaxHeapSize(size);
 		
 		this.cache = cacheFactory.createCache("testCache", config);
+		this.cache.clear();
 	}
 
 	@Test
 	public void testCache() throws CacheException {
+		createCache(10);
 		super.testBasicCache(cache, false);
 		cache.close();
 	}
 
+	@Test
+	public void testPut() throws CacheException {
+		createCache(10000);
+		super.testPut(cache, 10000, 1024);
+		cache.close();
+	}
 }
