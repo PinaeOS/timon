@@ -13,18 +13,18 @@
 	<global key="" value="" />
 	
 	<sql name="GET_ID">
-		select /* NO_CACHE */ id from :table
+		select /* NO_CACHE, SHOW=WARN */ id from :table
 	</sql>
 	
 	<sql name="GET_PERSON_1">
-		select /* NO_CACHE */ * from :table where 1=1 
+		select /* NO_CACHE, SHOW=WARN */ * from :table where 1=1 
 		<choose when="id">
 			and id = :id
 		</choose>
 	</sql>
 	
 	<sql name="GET_PERSON_2">
-		select /* NO_CACHE */ * from :table where 1=1 {name} {id} {order}
+		select /* NO_CACHE, SHOW=ERROR */ * from :table where 1=1 {name} {id} {order}
 		<choose when="id" statement="id">
 			and id = :id
 		</choose>

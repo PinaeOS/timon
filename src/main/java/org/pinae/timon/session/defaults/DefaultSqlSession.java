@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.pinae.timon.cache.Cache;
 import org.pinae.timon.cache.CacheException;
 import org.pinae.timon.reflection.AnnotationReflector;
@@ -31,14 +32,19 @@ import org.pinae.timon.util.MessageDigestUtils;
  */
 public class DefaultSqlSession implements SqlSession {
 
+	private static Logger logger = Logger.getLogger(SqlSession.class);
+
 	private Connection connection;
 
 	private SqlExecutor executor;
 	private SqlMetadata metadata;
 
 	private Cache cache;
-	
+
 	private ConfigMap<String, String> sessionConfig;
+
+	private boolean isCacheSql = true; // 全局SQL缓存开关, 默认开启缓存
+	private boolean isShowSql = false; // SQL显示开关, 默认不显示SQL
 
 	/**
 	 * 构造函数
@@ -50,7 +56,7 @@ public class DefaultSqlSession implements SqlSession {
 	 * @throws IOException IO异常
 	 */
 	public DefaultSqlSession(Connection conn, Cache cache, ConfigMap<String, String> sessionConfig) throws IOException {
-		
+
 		this.connection = conn;
 		this.cache = cache;
 		this.sessionConfig = sessionConfig;
@@ -60,6 +66,16 @@ public class DefaultSqlSession implements SqlSession {
 			this.metadata = new SqlMetadata(conn);
 		} else {
 			throw new IOException("Connection is NULL");
+		}
+
+		// 检查Session配置文件中缓存禁止缓存结果
+		if ("DISABLE".equals(this.sessionConfig.getString("sql.cache", "ENABLE").toUpperCase())) {
+			isCacheSql = false;
+		}
+
+		// 检查Session配置文件中是否显示SQL
+		if ("ENABLE".equals(this.sessionConfig.getString("sql.show", "DISABLE").toUpperCase())) {
+			isShowSql = true;
 		}
 	}
 
@@ -88,7 +104,7 @@ public class DefaultSqlSession implements SqlSession {
 	}
 
 	public Object[] one(String sql) {
-		return one(sql, (ResultHandler)null);
+		return one(sql, (ResultHandler) null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -126,45 +142,41 @@ public class DefaultSqlSession implements SqlSession {
 	}
 
 	public List<Object[]> select(String sql) {
-		return select(sql, (ResultHandler)null);
+		return select(sql, (ResultHandler) null);
 	}
 
 	@SuppressWarnings("unchecked")
 	public List<Object[]> select(String sql, ResultHandler handler) {
-		
+
 		if (StringUtils.isBlank(sql)) {
 			throw new NullPointerException("SQL is NULL");
 		}
-		
+
 		List<Object[]> queryResult = null;
-		
+
 		try {
 			String sqlKey = MessageDigestUtils.MD5(sql);
-			
-			boolean isCacheSql = true;
 
-			// 检查Session配置文件中缓存禁止缓存结果
-			if ("DISABLE".equals(this.sessionConfig.getString("cache.sql", "ENABLE"))) {
-				isCacheSql = false;
-			}
-			
+			boolean isCacheSql = this.isCacheSql;
+
 			// 检查SQL语句中禁止缓存结果
 			Map<String, String> comment = parseSqlComment(sql);
-			if ("FALSE".equals(comment.get("CACHE"))){
+			if ("FALSE".equals(comment.get("CACHE"))) {
 				isCacheSql = false;
 			}
-			
+
 			if (this.cache != null && isCacheSql == true) {
-				queryResult = (List<Object[]>)this.cache.get(sqlKey);
+				queryResult = (List<Object[]>) this.cache.get(sqlKey);
 			}
-			
+
 			if (queryResult == null) {
+				printSql(sql, comment);
 				queryResult = this.executor.select(sql);
-				
+
 				if (handler != null) {
 					handler.handle(queryResult);
 				}
-				
+
 				if (this.cache != null && isCacheSql == true) {
 					int expire = -1;
 					if (StringUtils.isNumeric(comment.get("CACHE"))) {
@@ -182,7 +194,7 @@ public class DefaultSqlSession implements SqlSession {
 				}
 			}
 		} catch (CacheException e) {
-			
+
 		}
 		return queryResult;
 	}
@@ -263,10 +275,14 @@ public class DefaultSqlSession implements SqlSession {
 	}
 
 	public boolean execute(String sql) {
+		printSql(sql);
 		return this.executor.execute(sql);
 	}
 
 	public boolean execute(List<String> sqlList) {
+		for (String sql : sqlList) {
+			printSql(sql);
+		}
 		return this.executor.execute(sqlList);
 	}
 
@@ -293,31 +309,72 @@ public class DefaultSqlSession implements SqlSession {
 		}
 		return null;
 	}
-	
+
 	private Map<String, String> parseSqlComment(String sql) {
 		Map<String, String> commentMap = new HashMap<String, String>();
+		try {
 		while (StringUtils.contains(sql, "/*") && StringUtils.contains(sql, "*/")) {
 			String comment = StringUtils.substringBetween(sql, "/*", "*/");
 			comment = comment.toUpperCase().trim();
-			
+
 			if (StringUtils.isNotEmpty(comment)) {
 				if (comment.contains("NO_CACHE")) {
 					commentMap.put("CACHE", "FALSE");
 				}
 				String commentItems[] = comment.split(",");
 				for (String commentItem : commentItems) {
-					if (commentItem.contains("=")) {
-						String value[] = commentItem.split("=");
+					if (commentItem != null && commentItem.contains("=")) {
+						String value[] = commentItem.trim().split("=");
 						if (value != null && value.length == 2) {
-							commentMap.put(value[0], value[1]);
+							commentMap.put(value[0].trim(), value[1].trim());
 						}
 					}
 				}
 			}
-			
+
 			sql = StringUtils.substringBefore(sql, "/*") + StringUtils.substringAfter(sql, "*/");
 		}
+		} catch (Exception e) {
+			logger.error("Parse sql comment fail:" + sql);
+		}
 		return commentMap;
+	}
+	
+	private void printSql(String sql) {
+		 Map<String, String> comment = parseSqlComment(sql);
+		 printSql(sql, comment);
+	}
+
+	private void printSql(String sql, Map<String, String> comment) {
+		boolean isShowSql = this.isShowSql;
+
+		if (comment.containsKey("SHOW") && !"FALSE".equals(comment.get("SHOW"))) {
+			isShowSql = true;
+		}
+		if (isShowSql) {
+			String level = comment.get("SHOW");
+			if (StringUtils.isEmpty(level)) {
+				level = "DEBUG";
+			}
+			level = level.toUpperCase();
+			if (!StringUtils.containsAny(level, "DEBUG", "INFO", "WARN", "ERROR")) {
+				level = "DEBUG";
+			}
+			switch (level) {
+			case "DEBUG":
+				logger.debug(sql);
+				break;
+			case "INFO":
+				logger.info(sql);
+				break;
+			case "WARN":
+				logger.warn(sql);
+				break;
+			case "ERROR":
+				logger.error(sql);
+				break;
+			}
+		}
 	}
 
 }
