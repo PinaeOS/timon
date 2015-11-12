@@ -11,7 +11,7 @@ import org.pinae.timon.reflection.annotation.Column;
 
 public class AnnotationReflector implements Reflector {
 	
-	private static Logger log = Logger.getLogger(AnnotationReflector.class);
+	private static Logger logger = Logger.getLogger(AnnotationReflector.class);
 	
 	private Class<?> clazz;
 	
@@ -55,7 +55,7 @@ public class AnnotationReflector implements Reflector {
 			try {
 				object = clazz.newInstance();
 			} catch (Exception e) {
-				log.error("Instance class exception: " + e.getMessage());
+				logger.error("Instance class exception: " + e.getMessage());
 			}
 			
 			Field[] fields = clazz.getDeclaredFields();
@@ -68,7 +68,7 @@ public class AnnotationReflector implements Reflector {
 							field.setAccessible(true);
 							field.set(object, data.get(column.name()));
 						} catch (Exception e) {
-							log.error("set field value exception: " + e.getMessage());
+							logger.error("set field value exception: " + e.getMessage());
 						}
 					}
 				}

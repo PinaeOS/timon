@@ -36,7 +36,7 @@ import org.pinae.timon.helper.parser.UpdateParser;
  */
 public class SqlParser {
 	
-	private static Logger log = Logger.getLogger(SqlParser.class);
+	private static Logger logger = Logger.getLogger(SqlParser.class);
 	
 	private CCJSqlParserManager parserManager = new CCJSqlParserManager();
 	
@@ -71,9 +71,9 @@ public class SqlParser {
 				tableSet = new DropParser().parse((Drop)statement);
 			}
 		} catch (Exception e) {
-			log.debug(String.format("SQL Parse Exception: exception=%s, sql=%s", e.getMessage(), sql));
+			logger.debug(String.format("SQL Parse Exception: exception=%s, sql=%s", e.getMessage(), sql));
 		} catch (Error e) {
-			log.debug(String.format("SQL Parse Exception: exception=%s, sql=%s", e.getMessage(), sql));
+			logger.debug(String.format("SQL Parse Exception: exception=%s, sql=%s", e.getMessage(), sql));
 		}
 		
 		return tableSet;

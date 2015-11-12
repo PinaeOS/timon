@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
  */
 public class SqlExecutor {
 	
-	private static Logger log = Logger.getLogger(SqlExecutor.class);
+	private static Logger logger = Logger.getLogger(SqlExecutor.class);
 	
 	private Connection conn = null;
 	
@@ -60,7 +60,7 @@ public class SqlExecutor {
 				}
 
 			} catch (SQLException e) {
-				log.error(String.format("select Exception: exception=%s; sql=%s", e.getMessage(), sql));
+				logger.error(String.format("select Exception: exception=%s; sql=%s", e.getMessage(), sql));
 			} finally {
 				try {
 					if (rs != null && rs.isClosed() == false) {
@@ -70,7 +70,7 @@ public class SqlExecutor {
 						stmt.close();
 					}
 				} catch (SQLException e) {
-					log.error(e.getMessage(), e);
+					logger.error(e.getMessage(), e);
 				}
 			}
 		}
@@ -95,14 +95,14 @@ public class SqlExecutor {
 			stmt.execute(sql);
 			result = true;
 		} catch (SQLException e) {
-			log.error(String.format("execute Exception: exception=%s; sql=%s", e.getMessage(), sql));
+			logger.error(String.format("execute Exception: exception=%s; sql=%s", e.getMessage(), sql));
 		} finally {
 			try {
 				if (stmt != null && stmt.isClosed() == false) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				log.error(e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 			}
 		}
 
@@ -130,14 +130,14 @@ public class SqlExecutor {
 			stmt.executeBatch();
 			result = true;
 		} catch (SQLException e) {
-			log.error(String.format("execute Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("execute Exception: exception=%s", e.getMessage()));
 		} finally {
 			try {
 				if (stmt != null && stmt.isClosed() == false) {
 					stmt.close();
 				}
 			} catch (SQLException e) {
-				log.error(e.getMessage());
+				logger.error(e.getMessage());
 			}
 		}
 
@@ -148,7 +148,7 @@ public class SqlExecutor {
 		try {
 			conn.commit();
 		} catch (SQLException e) {
-			log.error(String.format("commit Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("commit Exception: exception=%s", e.getMessage()));
 		}
 	}
 
@@ -156,7 +156,7 @@ public class SqlExecutor {
 		try {
 			conn.rollback();
 		} catch (SQLException e) {
-			log.error(String.format("rollback Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("rollback Exception: exception=%s", e.getMessage()));
 		}
 	}
 
@@ -164,7 +164,7 @@ public class SqlExecutor {
 		try {
 			conn.close();
 		} catch (SQLException e) {
-			log.error(String.format("close Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("close Exception: exception=%s", e.getMessage()));
 		}
 	}
 	
@@ -174,7 +174,7 @@ public class SqlExecutor {
 				return conn.isClosed();
 			}
 		} catch (SQLException e) {
-			log.error(String.format("isClosed Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("isClosed Exception: exception=%s", e.getMessage()));
 		}
 		return true;
 	}

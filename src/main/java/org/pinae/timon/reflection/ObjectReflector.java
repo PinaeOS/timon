@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 public class ObjectReflector implements Reflector {
 	
-	private static Logger log = Logger.getLogger(ObjectReflector.class);
+	private static Logger logger = Logger.getLogger(ObjectReflector.class);
 	
 	private Class<?> clazz;
 	
@@ -36,7 +36,7 @@ public class ObjectReflector implements Reflector {
 		try {
 			object = clazz.newInstance();
 		} catch (Exception e) {
-			log.error("Instance class exception: " + e.getMessage());
+			logger.error("Instance class exception: " + e.getMessage());
 		}
 		
 		for (int i = 0; i < columns.length; i++) {
@@ -46,7 +46,7 @@ public class ObjectReflector implements Reflector {
 				field.setAccessible(true);
 				field.set(object, row[i]);
 			} catch (Exception e) {
-				log.error("set field value exception: " + e.getMessage());
+				logger.error("set field value exception: " + e.getMessage());
 			}
 		}
 

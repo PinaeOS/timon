@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 
 public class SqlMetadata {
 
-	private static Logger log = Logger.getLogger(SqlMetadata.class);
+	private static Logger logger = Logger.getLogger(SqlMetadata.class);
 
 	private Connection conn = null;
 	
@@ -55,7 +55,7 @@ public class SqlMetadata {
 			}
 
 		} catch (Exception e) {
-			log.error(String.format("getMetadataBySQL Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("getMetadataBySQL Exception: exception=%s", e.getMessage()));
 		}
 		return table;
 	}
@@ -114,7 +114,7 @@ public class SqlMetadata {
 				
 			}
 		} catch (Exception e) {
-			log.error(String.format("getMetadataByTable Exception: exception=%s", e.getMessage()));
+			logger.error(String.format("getMetadataByTable Exception: exception=%s", e.getMessage()));
 		}
 		return table;
 	}
@@ -124,7 +124,7 @@ public class SqlMetadata {
 			try {
 				conn.close();
 			} catch (SQLException e) {
-				log.error(String.format("close Exception: exception=%s", e.getMessage()));
+				logger.error(String.format("close Exception: exception=%s", e.getMessage()));
 			}
 		}
 	}
