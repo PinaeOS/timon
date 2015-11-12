@@ -16,7 +16,7 @@ import org.pinae.timon.cache.decorators.ehcache.EhCacheConfiguration;
  *
  */
 public class EhCacheTest extends KVCacheTestCase {
-	protected final Logger log = Logger.getLogger(EhCacheTest.class);
+	protected final Logger logger = Logger.getLogger(EhCacheTest.class);
 
 	private CacheFactory cacheFactory = CacheFactory.getInstance();
 

@@ -14,7 +14,7 @@ import org.pinae.timon.cache.KVCacheTestCase;
  *
  */
 public class MemcachedCacheTest extends KVCacheTestCase {
-	protected final Logger log = Logger.getLogger(MemcachedCacheTest.class);
+	protected final Logger logger = Logger.getLogger(MemcachedCacheTest.class);
 
 	private CacheFactory cacheFactory = CacheFactory.getInstance();
 

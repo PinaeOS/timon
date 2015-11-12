@@ -17,7 +17,7 @@ import org.pinae.timon.cache.decorator.syn.eviction.FIFOEvictionPolicy;
  *
  */
 public class SynchronizedCacheTest extends KVCacheTestCase {
-	protected final Logger log = Logger.getLogger(SynchronizedCacheTest.class);
+	protected final Logger logger = Logger.getLogger(SynchronizedCacheTest.class);
 
 	private CacheFactory cacheFactory = CacheFactory.getInstance();
 	
