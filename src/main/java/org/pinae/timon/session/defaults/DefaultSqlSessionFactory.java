@@ -11,7 +11,6 @@ import org.pinae.timon.cache.Cache;
 import org.pinae.timon.cache.CacheConfiguration;
 import org.pinae.timon.cache.CacheException;
 import org.pinae.timon.cache.CacheFactory;
-import org.pinae.timon.session.DBType;
 import org.pinae.timon.session.SqlSession;
 import org.pinae.timon.session.SqlSessionFactory;
 import org.pinae.timon.session.datasource.C3p0DataSource;
@@ -156,25 +155,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 			}
 		}
 		return null;
-	}
-
-	public String getDBType() {
-		// 数据库驱动关键字
-		String driverKeywords[] = { DBType.MYSQL, DBType.ORACLE, DBType.SQLITE };
-		// 数据库驱动类
-		String driver = this.sessionConfigMap.get("driver");
-
-		// 通过比对数据库驱动类中的关键字判断数据库类型
-		String dbType = null;
-		if (StringUtils.isNotBlank(driver)) {
-			for (String keyword : driverKeywords) {
-				if (driver.contains(keyword)) {
-					dbType = keyword;
-				}
-			}
-		}
-
-		return dbType;
 	}
 
 }
