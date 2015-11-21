@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-
-<mapper namespaces="org.timon.test.foramt">
-	<sql name="formatSelectS1">
-		select * from :table where name='Hui'
-	</sql>
-</mapper>
