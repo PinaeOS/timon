@@ -56,9 +56,9 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 			throw new NullPointerException("filename is NULL");
 		}
 		
-		File file = new File(filename);
-		if (file.exists() && file.isFile()) {
-			this.sessionConfigMap = ConfigMap.load(file);
+		filename = getFilePath(filename);
+		if (filename != null) {
+			this.sessionConfigMap = ConfigMap.load(filename);
 			createInstance();
 		} else {
 			throw new IOException("No such file : " + filename);
@@ -84,35 +84,44 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	private void createCache() throws IOException {
-		String cacheConfigFile = ClassLoaderUtils.getResourcePath("") + "cache.properties";
+		
+		String path = ClassLoaderUtils.getResourcePath("");
+		String cacheConfigFile = path + "cache.properties";
+		
 		if (this.sessionConfigMap.containsKey("sql.cache.config")) {
 			cacheConfigFile = this.sessionConfigMap.get("sql.cache.config");
 		}
 		
-		ConfigMap<String, String> cacheConfigMap = ConfigMap.load(new File(cacheConfigFile));
-		CacheConfiguration cacheConfig = CacheConfiguration.build(cacheConfigMap);
-		
-		try {
-			if (cacheConfig != null) {
-				
-				String cacheName = this.toString();
-				if (cacheConfigMap.containsKey("cache.name")) {
-					cacheName = cacheConfigMap.get("cache.name");
-					if (StringUtils.isBlank(cacheName)) {
-						cacheName = this.toString();
+		cacheConfigFile = getFilePath(cacheConfigFile);
+		if (cacheConfigFile != null) {
+			ConfigMap<String, String> cacheConfigMap = ConfigMap.load(new File(cacheConfigFile));
+			CacheConfiguration cacheConfig = CacheConfiguration.build(cacheConfigMap);
+			
+			try {
+				if (cacheConfig != null) {
+					
+					String cacheName = this.toString();
+					if (cacheConfigMap.containsKey("cache.name")) {
+						cacheName = cacheConfigMap.get("cache.name");
+						if (StringUtils.isBlank(cacheName)) {
+							cacheName = this.toString();
+						}
 					}
-				}
 
-				this.cache = CacheFactory.getInstance().createCache(cacheName, cacheConfig);
-				
-				logger.info(String.format("Cache create successful: adapter=%s, max_size=%d, expire=%d", 
-						cacheConfigMap.get("cache.adapter"), cacheConfig.getMaxHeapSize(), cacheConfig.getExpire()));
-			} else {
-				logger.info("Cache is DISABLE");
+					this.cache = CacheFactory.getInstance().createCache(cacheName, cacheConfig);
+					
+					logger.info(String.format("Cache create successful: adapter=%s, max_size=%d, expire=%d", 
+							cacheConfigMap.get("cache.adapter"), cacheConfig.getMaxHeapSize(), cacheConfig.getExpire()));
+				} else {
+					logger.info("Cache is DISABLE");
+				}
+			} catch (CacheException e) {
+				logger.error("Cache create error: " + e.getMessage());
 			}
-		} catch (CacheException e) {
-			logger.error("Cache create error: " + e.getMessage());
+		} else {
+			logger.info("No cache properties file, Cache is DISABLE");
 		}
+		
 	}
 
 	private void createInstance() throws IOException {
@@ -158,6 +167,29 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 				}
 
 				return new DefaultSqlSession(conn, this.cache, this.sessionConfigMap);
+			}
+		}
+		return null;
+	}
+	
+	/* 
+	 * 获取文件全路径, 如果仅包含文件名则在本地执行目录下寻找同名文件
+	 * 
+	 * @param filename 文件名(路径)
+	 * 
+	 * @return 文件全路径, 如果无法找到文件则为null
+	 */
+	private String getFilePath(String filename) {
+		if (filename != null) {
+			File file = new File(filename);
+			if (file.exists() && file.isFile()) {
+				return filename;
+			} else {
+				filename = ClassLoaderUtils.getResourcePath("") + filename;
+				file = new File(filename);
+				if (file.exists() && file.isFile()) {
+					return filename;
+				}
 			}
 		}
 		return null;

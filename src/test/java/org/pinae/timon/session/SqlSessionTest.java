@@ -13,9 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.pinae.timon.session.defaults.DefaultSqlSessionFactory;
 import org.pinae.timon.session.handle.ResultHandler;
 import org.pinae.timon.session.pojo.AnnotationPerson;
 import org.pinae.timon.session.pojo.Person;
@@ -26,16 +24,20 @@ public class SqlSessionTest {
 	private static Logger logger = Logger.getLogger(SqlSessionTest.class);
 	
 	private static SqlBuilder builder = null;
-	private static SqlSessionFactory sessionFactory = null;
+	protected static SqlSessionFactory sessionFactory = null;
 	
 	private SqlSession session = null;
 	
-	@BeforeClass
-	public static void init() {
+	static {
 		try {
-			SqlSessionTest.builder = new SqlBuilder();
-			SqlSessionTest.sessionFactory = new DefaultSqlSessionFactory();
-			
+			builder = new SqlBuilder();
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+	}
+	
+	public static void initData() {
+		try {
 			List<String> initSqlList = SqlSessionTest.builder.getScript("INIT_SCRIPT");
 			SqlSession session = sessionFactory.getSession();
 			session.execute(initSqlList);
