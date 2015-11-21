@@ -9,16 +9,16 @@ import org.pinae.timon.util.ConfigMap;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /**
- * 数据库连接池管理
+ * 基于C3P0的数据库连接池管理
  * 
  * @author Huiyugeng
  * 
  */
-public class C3p0DataSource implements DataSource {
+public class C3P0DataSource implements DataSource {
 	
 	private ComboPooledDataSource datasource;
 
-	public C3p0DataSource(ConfigMap<String, String> datasource) throws IOException {
+	public C3P0DataSource(ConfigMap<String, String> datasource) throws IOException {
 		try {
 
 			this.datasource = new ComboPooledDataSource();
@@ -47,7 +47,7 @@ public class C3p0DataSource implements DataSource {
 	public Connection getConnection() throws IOException {
 		Connection conn = null;
 		try {
-			conn = datasource.getConnection();
+			conn = this.datasource.getConnection();
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}

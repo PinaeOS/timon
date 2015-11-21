@@ -13,9 +13,11 @@ import org.pinae.timon.cache.CacheException;
 import org.pinae.timon.cache.CacheFactory;
 import org.pinae.timon.session.SqlSession;
 import org.pinae.timon.session.SqlSessionFactory;
-import org.pinae.timon.session.datasource.C3p0DataSource;
+import org.pinae.timon.session.datasource.BoneCPDataSource;
+import org.pinae.timon.session.datasource.C3P0DataSource;
+import org.pinae.timon.session.datasource.DBCPDataSource;
 import org.pinae.timon.session.datasource.DataSource;
-import org.pinae.timon.session.datasource.JdbcDataSource;
+import org.pinae.timon.session.datasource.JDBCDataSource;
 import org.pinae.timon.session.handle.ConnectionHandler;
 import org.pinae.timon.util.ClassLoaderUtils;
 import org.pinae.timon.util.ConfigMap;
@@ -83,8 +85,8 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
 	private void createCache() throws IOException {
 		String cacheConfigFile = ClassLoaderUtils.getResourcePath("") + "cache.properties";
-		if (sessionConfigMap.containsKey("sql.cache.config")) {
-			cacheConfigFile = sessionConfigMap.get("sql.cache.config");
+		if (this.sessionConfigMap.containsKey("sql.cache.config")) {
+			cacheConfigFile = this.sessionConfigMap.get("sql.cache.config");
 		}
 		
 		ConfigMap<String, String> cacheConfigMap = ConfigMap.load(new File(cacheConfigFile));
@@ -114,13 +116,17 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	private void createInstance() throws IOException {
-		// 构建数据源 (jdbc/c3p0)
-		String type = sessionConfigMap.get("type");
+		// 构建数据源 (jdbc/c3p0/bonecp/dbcp)
+		String type = this.sessionConfigMap.get("type");
 		if (type != null) {
 			if (type.equalsIgnoreCase("c3p0")) {
-				datasource = new C3p0DataSource(sessionConfigMap);
+				this.datasource = new C3P0DataSource(sessionConfigMap);
+			} else if (type.equalsIgnoreCase("bonecp")) {
+				this.datasource = new BoneCPDataSource(sessionConfigMap);
+			} else if (type.equalsIgnoreCase("dbcp")) {
+				this.datasource = new DBCPDataSource(sessionConfigMap);
 			} else if (type.equalsIgnoreCase("jdbc")) {
-				datasource = new JdbcDataSource(sessionConfigMap);
+				this.datasource = new JDBCDataSource(sessionConfigMap);
 			} else {
 				throw new IOException(String.format("Unknow datasource type : %s", type));
 			}
@@ -137,10 +143,10 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	}
 
 	public SqlSession getSession(ConnectionHandler handler) throws IOException {
-		if (datasource != null) {
-			Connection conn = datasource.getConnection();
+		if (this.datasource != null) {
+			Connection conn = this.datasource.getConnection();
 			if (conn != null) {
-				boolean autoCommit = sessionConfigMap.getBoolean("auto_commit", true);
+				boolean autoCommit = this.sessionConfigMap.getBoolean("auto_commit", true);
 				try {
 					conn.setAutoCommit(autoCommit);
 				} catch (SQLException e) {
@@ -151,7 +157,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 					handler.handle(conn);
 				}
 
-				return new DefaultSqlSession(conn, this.cache, sessionConfigMap);
+				return new DefaultSqlSession(conn, this.cache, this.sessionConfigMap);
 			}
 		}
 		return null;

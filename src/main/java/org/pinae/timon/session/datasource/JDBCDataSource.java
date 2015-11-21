@@ -7,7 +7,7 @@ import java.sql.DriverManager;
 import org.apache.commons.lang3.StringUtils;
 import org.pinae.timon.util.ConfigMap;
 
-public class JdbcDataSource implements DataSource {
+public class JDBCDataSource implements DataSource {
 	
 	/* JDBC连接参数 */
 	private ConfigMap<String, String> datasource = null;
@@ -17,7 +17,7 @@ public class JdbcDataSource implements DataSource {
 	 * 
 	 * @param filename JDBC配置文件名
 	 */
-	public JdbcDataSource(ConfigMap<String, String> datasource) {
+	public JDBCDataSource(ConfigMap<String, String> datasource) {
 		this.datasource = datasource;
 	}
 	
