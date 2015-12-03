@@ -11,7 +11,7 @@ public class SqlScriptReaderTest {
 	@Test
 	public void testGetSQLList() {
 		SqlScriptReader reader = new SqlScriptReader();
-		List<String> sqlList = reader.getSQLList("src/test/java/test.sql", "UTF8");
+		List<String> sqlList = reader.getSQLList("src/test/resources/test.sql", "UTF8");
 		
 		assertEquals(sqlList.size(), 8);
 	}

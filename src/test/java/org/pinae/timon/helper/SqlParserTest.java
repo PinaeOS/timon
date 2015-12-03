@@ -10,6 +10,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 import org.pinae.timon.helper.parser.SelectParser;
+import org.pinae.timon.sql.Sql;
 import org.pinae.timon.sql.SqlBuilder;
 
 import net.sf.jsqlparser.JSQLParserException;
@@ -32,10 +33,10 @@ public class SqlParserTest {
 	
 	@Test
 	public void testParserSQL() {
-		String sql = builder.getSQLByName("org.timon.test.parser.parseSelectS1");
+		Sql sql = builder.getSQLByName("org.timon.test.parser.parseSelectS1");
 		
 		try {
-			Statement statement = new CCJSqlParserManager().parse(new StringReader(sql));
+			Statement statement = new CCJSqlParserManager().parse(new StringReader(sql.getSql()));
 			if (statement instanceof Select) {
 				Set<String> tableSet = new SelectParser().parse((Select)statement);
 				assertEquals(tableSet.size(), 3);

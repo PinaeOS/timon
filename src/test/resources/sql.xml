@@ -2,9 +2,12 @@
 
 <mapper namespaces="">
 
+	<env key="prepare" value="true" />
+	
 	<import file="sql/sql_parse_test.xml"/>
 	<import file="sql/sql_format_test.xml"/>
 	<import file="sql/sql_cache_test.xml"/>
+	<import file="sql/sql_builder_test.xml"/>
 	
 	<script name="TEST_SCRIPT" file="test.sql" />
 	<script name="INIT_SCRIPT" file="init.sql" />
@@ -25,43 +28,25 @@
 	
 	<sql name="GET_PERSON_2">
 		select /* NO_CACHE, SHOW=ERROR */ * from :table where 1=1 {name} {id} {order}
-		<choose when="id" statement="id">
+		<choose when="id" block="id">
 			and id = :id
 		</choose>
 		<choose when="name">
 			and name = :name
 		</choose>
-		<choose when="id" statement="order">
+		<choose when="id" block="order">
 			order by id
 		</choose>
 	</sql>
 	
-	<sql name="SUB_SQL1">
-		select /* NO_CACHE */ name from USER1
+	<sql name="GET_PERSON_3" prepare="true">
+		select /* NO_CACHE, SHOW=WARN */ * from :table where 1=1 
 		<choose when="id">
-			where id = :id
+			and id = :id
 		</choose>
 	</sql>
 	
-	<sql name="SUB_SQL2">
-		select /* NO_CACHE */ name from USER2 {order}
-		<choose when="id" statement="order">
-			order by id
-		</choose>
-	</sql>
-	
-	<sql name="SUB_SQL3">
-		select /* NO_CACHE */ name from (${SUB_SQL1}) t1 union select name from (${SUB_SQL2}) t2
-	</sql>
-	
-	<sql name="SQL_REF_TEST">
-		select /* NO_CACHE */ name from (${SUB_SQL3}) t {order}
-		<choose when="id" statement="order">
-			order by id
-		</choose>
-	</sql>
-	
-	<sql name="INSERT_PERSON">
+	<sql name="INSERT_PERSON" prepare="true">
 		insert into :table(id, name, age, phone) values (:id, :name, :age, :phone)
 	</sql>
 	

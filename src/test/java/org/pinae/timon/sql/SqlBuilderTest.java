@@ -29,28 +29,28 @@ public class SqlBuilderTest {
 	
 	@Test
 	public void testGetSQLByName() {
-		String sql = builder.getSQLByName("GET_ID");
-		assertEquals(sql, "select id from person");
+		Sql sql = builder.getSQLByName("org.timon.test.builder.GET_ID");
+		assertEquals(sql.getSql(), "select id from person");
 	}
 	
 	@Test
 	public void testGetSQLByNameWithParameters1() {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
-		String sql = builder.getSQLByNameWithParameters("GET_PERSON_1", parameters);
-		assertEquals(sql, "select * from person where 1=1 and id = 20");
+		Sql sql = builder.getSQLByNameWithParameters("org.timon.test.builder.GET_PERSON_1", parameters);
+		assertEquals(sql.getSql(), "select * from person where 1=1 and id = 20");
 	}
 	
 	@Test
 	public void testGetSQLByNameWithParameters2() {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
-		String sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
-		assertEquals(sql, "select * from person where 1=1 and id = 20 order by id");
+		Sql sql = builder.getSQLByNameWithParameters("org.timon.test.builder.GET_PERSON_2", parameters);
+		assertEquals(sql.getSql(), "select * from person where 1=1 and id = 20 order by id");
 		
 		parameters.put("name", "Hui");
-		sql = builder.getSQLByNameWithParameters("GET_PERSON_2", parameters);
-		assertEquals(sql, "select * from person where 1=1 and name = 'Hui' and id = 20 order by id");
+		sql = builder.getSQLByNameWithParameters("org.timon.test.builder.GET_PERSON_2", parameters);
+		assertEquals(sql.getSql(), "select * from person where 1=1 and name = 'Hui' and id = 20 order by id");
 	}
 	
 	@Test
@@ -62,37 +62,37 @@ public class SqlBuilderTest {
 		person.setAge(20);
 		person.setPhone("13391562775");
 		
-		String sql = builder.getSQLByNameWithParameters("INSERT_PERSON", person);
-		assertEquals(sql, "insert into person(id, name, age, phone) values (3, 'Joe', 20, '13391562775')");
+		Sql sql = builder.getSQLByNameWithParameters("org.timon.test.builder.INSERT_PERSON", person);
+		assertEquals(sql.getSql(), "insert into person(id, name, age, phone) values (3, 'Joe', 20, '13391562775')");
 	}
 	
 	@Test
 	public void testGetSQLByNameWithSubSQL() {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 20);
-		String sql = builder.getSQLByNameWithParameters("SQL_REF_TEST", parameters);
-		assertEquals(sql, "select name from (select name from (select name from USER1 where id = 20) t1 union select name from (select name from USER2 order by id) t2) t order by id");
+		Sql sql = builder.getSQLByNameWithParameters("org.timon.test.builder.SQL_REF_TEST", parameters);
+		assertEquals(sql.getSql(), "select name from (select name from (select name from USER1 where id = 20) t1 union select name from (select name from USER2 order by id) t2) t order by id");
 	}
 	
 	@Test
 	public void testGetLimitSQLForOracle() {
-		String sql = builder.getSQLByName("GET_ID");
-		sql = SqlBuilder.getLimitSQL(sql, 10, 10, "oracle");
-		assertEquals(sql, "select * from ( select row_.*, rownum rownum_ from ( select id from person ) row_ where rownum <= 20) where rownum_ > 10");
+		Sql sql = builder.getSQLByName("org.timon.test.builder.GET_ID");
+		String query = SqlBuilder.getLimitSQL(sql.getSql(), 10, 10, "oracle");
+		assertEquals(query, "select * from ( select row_.*, rownum rownum_ from ( select id from person ) row_ where rownum <= 20) where rownum_ > 10");
 	}
 	
 	@Test
 	public void testGetLimitSQLForMySQL() {
-		String sql = builder.getSQLByName("GET_ID");
-		sql = SqlBuilder.getLimitSQL(sql, 10, 10, "mysql");
-		assertEquals(sql, "select * from ( select id from person ) t limit 10, 10");
+		Sql sql = builder.getSQLByName("org.timon.test.builder.GET_ID");
+		String query = SqlBuilder.getLimitSQL(sql.getSql(), 10, 10, "mysql");
+		assertEquals(query, "select * from ( select id from person ) t limit 10, 10");
 	}
 	
 	@Test
 	public void testGetCountSQL() {
-		String sql = builder.getSQLByName("GET_ID");
-		sql = SqlBuilder.getCountSQL(sql);
-		assertEquals(sql, "select count(*) from ( select id from person ) t");
+		Sql sql = builder.getSQLByName("org.timon.test.builder.GET_ID");
+		String query = SqlBuilder.getCountSQL(sql.getSql());
+		assertEquals(query, "select count(*) from ( select id from person ) t");
 	}
 	
 	@Test

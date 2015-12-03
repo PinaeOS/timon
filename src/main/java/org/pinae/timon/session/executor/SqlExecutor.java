@@ -1,6 +1,7 @@
 package org.pinae.timon.session.executor;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -8,8 +9,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.pinae.timon.sql.Sql;
 
 
 /**
@@ -18,7 +19,7 @@ import org.apache.log4j.Logger;
  * @author huiyugeng
  *
  */
-public class SqlExecutor {
+public class SqlExecutor extends SqlStatement {
 	
 	private static Logger logger = Logger.getLogger(SqlExecutor.class);
 	
@@ -28,26 +29,27 @@ public class SqlExecutor {
 		this.conn = conn;
 	}
 
-	public List<Object[]> select(String sql) {
-		if (StringUtils.isEmpty(sql)) {
+	public List<Object[]> select(Sql sql) {
+		
+		if (sql.validate() == false) {
 			return null;
-		} else {
-			sql = sql.trim();
 		}
 		
 		List<Object[]> dataList = null;
 		
-		if (sql.toLowerCase().startsWith("select")) {
+		if (sql.isSelect()) {
 
 			dataList = new ArrayList<Object[]>();
 			
+			String query = sql.getSql();
+			
 			ResultSet rs = null;
-			Statement stmt = null;
+			PreparedStatement stmt = null;
 
 			try {
-				stmt = conn.createStatement();
-
-				rs = stmt.executeQuery(sql);
+				stmt = this.createStatment(conn, sql);
+				rs = stmt.executeQuery();
+				
 				ResultSetMetaData rsmd = rs.getMetaData();
 
 				int columnCount = rsmd.getColumnCount();
@@ -60,7 +62,7 @@ public class SqlExecutor {
 				}
 
 			} catch (SQLException e) {
-				logger.error(String.format("select Exception: exception=%s; sql=%s", e.getMessage(), sql));
+				logger.error(String.format("select Exception: exception=%s; sql=%s", e.getMessage(), query));
 			} finally {
 				try {
 					if (rs != null && rs.isClosed() == false) {
@@ -77,22 +79,18 @@ public class SqlExecutor {
 		return dataList;
 	}
 	
-
-
-
-	public boolean execute(String sql) {
-		if (StringUtils.isEmpty(sql)) {
+	public boolean execute(Sql sql) {
+		if (sql.validate() == false) {
 			return false;
-		} else {
-			sql = sql.trim();
 		}
-
+		
 		boolean result = false;
-
+		
 		Statement stmt = null;
 		try {
-			stmt = conn.createStatement();
-			stmt.execute(sql);
+			stmt = this.createStatment(conn, sql);
+			stmt.execute(sql.getSql());
+			
 			result = true;
 		} catch (SQLException e) {
 			logger.error(String.format("execute Exception: exception=%s; sql=%s", e.getMessage(), sql));
@@ -122,10 +120,7 @@ public class SqlExecutor {
 		try {
 			stmt = conn.createStatement();
 			for (String sql : sqlList) {
-				if (StringUtils.isNotEmpty(sql)) {
-					sql = sql.trim();
-					stmt.addBatch(sql);
-				}
+				stmt.addBatch(sql);
 			}
 			stmt.executeBatch();
 			result = true;

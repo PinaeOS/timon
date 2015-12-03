@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespaces="org.timon.test.builder">
+	
+	<global key="table" value="person" />
+	
+	<sql name="GET_ID">
+		select id from :table
+	</sql>
+	
+	<sql name="GET_PERSON_1">
+		select * from :table where 1=1 
+		<choose when="id">
+			and id = :id
+		</choose>
+	</sql>
+	
+	<sql name="GET_PERSON_2">
+		select * from :table where 1=1 {name} {id} {order}
+		<choose when="id" block="id">
+			and id = :id
+		</choose>
+		<choose when="name">
+			and name = :name
+		</choose>
+		<choose when="id" block="order">
+			order by id
+		</choose>
+	</sql>
+	
+	<sql name="SUB_SQL1">
+		select name from USER1
+		<choose when="id">
+			where id = :id
+		</choose>
+	</sql>
+	
+	<sql name="SUB_SQL2">
+		select name from USER2 {order}
+		<choose when="id" block="order">
+			order by id
+		</choose>
+	</sql>
+	
+	<sql name="SUB_SQL3">
+		select name from (${org.timon.test.builder.SUB_SQL1}) t1 union select name from (${org.timon.test.builder.SUB_SQL2}) t2
+	</sql>
+	
+	<sql name="SQL_REF_TEST">
+		select name from (${org.timon.test.builder.SUB_SQL3}) t {order}
+		<choose when="id" block="order">
+			order by id
+		</choose>
+	</sql>
+	
+	<sql name="INSERT_PERSON">
+		insert into :table(id, name, age, phone) values (:id, :name, :age, :phone)
+	</sql>
+	
+</mapper>

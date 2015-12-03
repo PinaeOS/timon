@@ -12,8 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.pinae.timon.sql.Sql;
 
-public class SqlMetadata {
+public class SqlMetadata extends SqlStatement {
 
 	private static Logger logger = Logger.getLogger(SqlMetadata.class);
 
@@ -22,7 +23,7 @@ public class SqlMetadata {
 	public SqlMetadata(Connection conn) {
 		this.conn = conn;
 	}
-
+	
 	/**
 	 * 通过SQL语句获取元数据信息
 	 * 
@@ -30,13 +31,13 @@ public class SqlMetadata {
 	 * 
 	 * @return 元数据信息
 	 */
-	public List<Map<String, String>> getMetadataBySql(String sql) {
+	public List<Map<String, String>> getMetadataBySql(Sql sql) {
 		
 		List<Map<String, String>> table = new ArrayList<Map<String, String>>();
 		
 		try {
 
-			PreparedStatement ps = conn.prepareStatement(sql);
+			PreparedStatement ps = createStatment(conn, sql);
 			ResultSet rs = ps.executeQuery();
 			ResultSetMetaData rsme = rs.getMetaData();
 
@@ -67,7 +68,7 @@ public class SqlMetadata {
 	 * 
 	 * @return 列名
 	 */
-	public String[] getColumnsBySql(String sql) {
+	public String[] getColumnsBySql(Sql sql) {
 		String columns[] = null;
 		
 		List<Map<String, String>> table = getMetadataBySql(sql);

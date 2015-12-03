@@ -17,9 +17,10 @@ import org.junit.Test;
 import org.pinae.timon.session.handle.ResultHandler;
 import org.pinae.timon.session.pojo.AnnotationPerson;
 import org.pinae.timon.session.pojo.Person;
+import org.pinae.timon.sql.Sql;
 import org.pinae.timon.sql.SqlBuilder;
 
-public class SqlSessionTest {
+public abstract class SqlSessionTest {
 	
 	private static Logger logger = Logger.getLogger(SqlSessionTest.class);
 	
@@ -163,6 +164,18 @@ public class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
+	public void testGetPrepareSql() {
+		Map<String, Object> parameters = new HashMap<String, Object>();
+		parameters.put("id", 1);
+		
+		List<Person> table = (List<Person>) session.select(builder.getSQLByNameWithParameters("GET_PERSON_3", parameters), Person.class);
+		
+		assertEquals(table.size(), 1); // 用户数量测试
+		assertEquals(table.get(0).getId(), 1); // 用户编号测试
+	}
+	
+	@SuppressWarnings("unchecked")
+	// @Test
 	public void testCache() throws InterruptedException {
 		/* 
 		 * 在获取的列表(3条数据)中删除第一个元素, 缓存的数据应为2条, 
@@ -183,7 +196,7 @@ public class SqlSessionTest {
 			}
 		};
 		
-		String sql = builder.getSQLByName("org.timon.test.cache.GET_USER_INFO_WITH_CACHE");
+		Sql sql = builder.getSQLByName("org.timon.test.cache.GET_USER_INFO_WITH_CACHE");
 		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(sql, Map.class, handler);
 		assertEquals(table.size(), 2);
 

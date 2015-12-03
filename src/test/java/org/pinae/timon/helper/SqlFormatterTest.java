@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pinae.timon.sql.Sql;
 import org.pinae.timon.sql.SqlBuilder;
 
 public class SqlFormatterTest {
@@ -23,12 +24,12 @@ public class SqlFormatterTest {
 	
 	@Test
 	public void testFormatSQL() {
-		String sql = builder.getSQLByName("org.timon.test.foramt.formatSelectS1");
+		Sql sql = builder.getSQLByName("org.timon.test.format.formatSelectS1");
 		
 		SqlFormatter formatter = new SqlFormatter();
-		sql = formatter.format(sql);
+		String query = formatter.format(sql.getSql());
 		
-		String line[] = sql.split("\n");
+		String line[] = query.split("\n");
 		assertEquals(line.length, 6);
 		
 		assertEquals(line[0].trim(), "select");

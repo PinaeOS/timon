@@ -13,8 +13,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pinae.timon.io.SqlMapper.SQL;
-import org.pinae.timon.io.SqlMapper.SQL.Choose;
+import org.pinae.timon.io.SqlMapper.SqlObject;
+import org.pinae.timon.io.SqlMapper.SqlObject.Choose;
 import org.pinae.timon.io.SqlScriptReader;
 import org.pinae.timon.io.SqlMapperReader;
 import org.pinae.timon.util.ClassLoaderUtils;
@@ -28,8 +28,9 @@ import org.pinae.timon.util.ClassLoaderUtils;
  */
 public class SqlBuilder {
 
-	private Map<String, SQL> sqlMap = new HashMap<String, SQL>();
+	private Map<String, SqlObject> sqlMap = new HashMap<String, SqlObject>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
+	private Map<String, String> envMap = new HashMap<String, String>();
 	
 	private String path;
 	
@@ -41,6 +42,8 @@ public class SqlBuilder {
 			
 			this.sqlMap = reader.getSQLMap();
 			this.scriptMap = reader.getScriptMap();
+			this.envMap = reader.getEnvMap();
+			
 		} catch (IOException e) {
 			throw e;
 		}
@@ -55,14 +58,17 @@ public class SqlBuilder {
 			
 			this.sqlMap = reader.getSQLMap();
 			this.scriptMap = reader.getScriptMap();
+			this.envMap = reader.getEnvMap();
+			
 		} catch (IOException e) {
 			throw e;
 		}	
 	}
 	
-	public SqlBuilder(Map<String, SQL> sqlMap, Map<String, String> scriptMap) {
+	public SqlBuilder(Map<String, SqlObject> sqlMap, Map<String, String> scriptMap, Map<String, String> envMap) {
 		this.sqlMap = sqlMap;
 		this.scriptMap = scriptMap;
+		this.envMap = envMap;
 	}
 
 	/**
@@ -72,25 +78,8 @@ public class SqlBuilder {
 	 * 
 	 * @return SQL语句
 	 */
-	public String getSQLByName(String name) {
-		return getSQLByNameWithStatement(name, null);
-	}
-
-	/**
-	 * 根据SQL描述名称和参数获取SQL
-	 * 
-	 * @param name SQL描述名称
-	 * @param statments 需要替换的SQL语句
-	 * 
-	 * @return SQL语句
-	 */
-	public String getSQLByNameWithStatement(String name, Map<String, Object> statments) {
-		SQL sql = this.sqlMap.get(name);
-		if (sql != null) {
-			return replaceStatement(sql, statments);
-		} else {
-			return null;
-		}
+	public Sql getSQLByName(String name) {
+		return getSQLByNameWithParameters(name, null);
 	}
 
 	/**
@@ -102,19 +91,64 @@ public class SqlBuilder {
 	 * @return 构建后的SQL语句
 	 */
 
-	public String getSQLByNameWithParameters(String name, Object parameters) {
+	public Sql getSQLByNameWithParameters(String name, Object parameters) {
 		if (name == null) {
 			return null;
 		}
 		
 		Map<String, Object> parameterMap = buildParameters(parameters);
 		
-		SQL sql = this.sqlMap.get(name);
-		if (sql != null) {
-			return replaceSQL(sql, parameterMap);
+		SqlObject sqlObj = this.sqlMap.get(name);
+		if (sqlObj != null) {
+			
+			
+			if (sqlObj.isPrepare() == false || 
+					this.envMap.containsKey("prepare") == false || 
+					"false".equalsIgnoreCase(this.envMap.get("prepare"))) {
+				String sql = replaceSQL(sqlObj, parameterMap);
+				return new Sql(sql, parameterMap);
+			} else {
+				String sql = replaceChoose(sqlObj, parameterMap);
+				return getPreperSQLWithParameters(sql, parameterMap);
+			}
 		} else {
 			return null;
 		}
+	}
+	
+	/*
+	 * 构建预编译SQL所需要的SQL和变量
+	 */
+	private Sql getPreperSQLWithParameters(String query, Map<String, Object> parameters) {
+		
+		Pattern pattern = Pattern.compile(":\\w+");
+		Matcher matcher = pattern.matcher(query);
+		
+		int index = 1;
+		Map<String, Integer> keyIndex = new HashMap<String, Integer>();
+		while (matcher.find()) {
+			String word = matcher.group();
+			if (word.startsWith(":")) {
+				keyIndex.put(word.substring(1), index++);
+			}
+		}
+		
+		Map<Integer, Object> prepareValue = new HashMap<Integer, Object>();
+		Set<String> paramKeySet = parameters.keySet();
+		for (String paramKey : paramKeySet) {
+			Integer preIndex = keyIndex.get(paramKey);
+			Object preValue = parameters.get(paramKey);
+			
+			prepareValue.put(preIndex, preValue);
+		}
+		
+		query = matcher.replaceAll("?");
+		
+		Sql sql = new Sql(query, parameters);
+		sql.setPreperStatement(true);
+		sql.setPreperValues(prepareValue);
+		
+		return sql;
 	}
 	
 	/*
@@ -170,30 +204,30 @@ public class SqlBuilder {
 	 * 
 	 * @return 构建后的SQL语句
 	 */
-	private String replaceSQL(SQL sql, Map<String, Object> subSQLs) {
-		String sqlContent = sql.getValue();
+	private String replaceSQL(SqlObject sqlObj, Map<String, Object> subSQLs) {
+		String query = sqlObj.getValue();
 		
-		if (sqlContent != null) {
+		if (query != null) {
 			String regexs = "[$][{](\\w*)[}]"; //子句替换模式
 			Pattern regex = Pattern.compile(regexs);
-			Matcher regexMatcher = regex.matcher(sqlContent);
+			Matcher regexMatcher = regex.matcher(query);
 			while (regexMatcher.find()) {
 				String subSQLName = regexMatcher.group(1);
 				
-				SQL subSQL = this.sqlMap.get(subSQLName);
+				SqlObject subSQL = this.sqlMap.get(subSQLName);
 				if (subSQL != null) {
 					String subSQLContent = replaceSQL(subSQL, subSQLs);
 					
-					sqlContent = sqlContent.replace(regexMatcher.group(0), subSQLContent);
-					sql.setValue(sqlContent);
+					query = query.replace(regexMatcher.group(0), subSQLContent);
+					sqlObj.setValue(query);
 				}
 			}
 			
-			sqlContent = replaceStatement(sql, subSQLs);
-			sqlContent = replaceVariables(sqlContent, subSQLs);
+			query = replaceChoose(sqlObj, subSQLs);
+			query = replaceVariables(query, subSQLs);
 		}
 		
-		return sqlContent;
+		return query;
 	}
 
 	/*
@@ -204,21 +238,21 @@ public class SqlBuilder {
 	 * 
 	 * @return 构建后的SQL语句
 	 */
-	private String replaceStatement(SQL sql, Map<String, Object> parameters) {
-		String sqlContent = null;
-		if (sql != null) {
-			sqlContent = sql.getValue();
-			if (StringUtils.isNotEmpty(sqlContent)) {
+	private String replaceChoose(SqlObject sqlObj, Map<String, Object> parameters) {
+		String query = null;
+		if (sqlObj != null) {
+			query = sqlObj.getValue();
+			if (StringUtils.isNotEmpty(query)) {
 
 				try {
 					// 执行子句构建 子句格式为{statement}
-					List<Choose> chooseList = sql.getChooseList();
+					List<Choose> chooseList = sqlObj.getChooseList();
 
 					if (chooseList != null && parameters != null) {
 						for (Choose choose : chooseList) {
 							String condition = choose.getWhen();
 							if (parameters.containsKey(condition)) {
-								String statement = choose.getStatement();
+								String statement = choose.getBlock();
 
 								// 如果不存在statement参数，则使用when参数代替
 								if (StringUtils.isEmpty(statement)) {
@@ -226,10 +260,10 @@ public class SqlBuilder {
 								}
 								statement = "{" + statement + "}";
 
-								if (StringUtils.contains(sqlContent, statement)) {
-									sqlContent = sqlContent.replace(statement, choose.getValue());
+								if (StringUtils.contains(query, statement)) {
+									query = query.replace(statement, choose.getValue());
 								} else {
-									sqlContent = sqlContent + " " + choose.getValue();
+									query = query + " " + choose.getValue();
 								}
 							}
 						}
@@ -238,18 +272,18 @@ public class SqlBuilder {
 					//清理没有被替换的子句
 					String regexs = "[{](\\w*)[}]"; //子句替换模式
 					Pattern regex = Pattern.compile(regexs);
-					Matcher regexMatcher = regex.matcher(sqlContent);
+					Matcher regexMatcher = regex.matcher(query);
 					while (regexMatcher.find()) {
-						sqlContent = sqlContent.replace(regexMatcher.group(0), "");
+						query = query.replace(regexMatcher.group(0), "");
 					}
 					
 				} catch (Exception e) {
-					e.printStackTrace();
+					
 				}
 			}
 		}
 
-		return sqlContent;
+		return query;
 	}
 
 	/*
@@ -260,8 +294,8 @@ public class SqlBuilder {
 	 * 
 	 * @return 构建后的SQL语句
 	 */
-	private String replaceVariables(String sql, Map<String, Object> parameters) {
-		if (StringUtils.isNotEmpty(sql)) {
+	private String replaceVariables(String query, Map<String, Object> parameters) {
+		if (StringUtils.isNotEmpty(query)) {
 			try {
 				if (parameters != null) {
 					// 执行变量替换, 变量格式为:var
@@ -293,20 +327,20 @@ public class SqlBuilder {
 						}
 
 						key = ":" + key;
-						sql = StringUtils.replace(sql, key, (String) value);
+						query = StringUtils.replace(query, key, (String) value);
 					}
 				}
 
 				// 多个空格替换为单个空格
-				if (sql != null) {
-					sql = sql.replaceAll(" +", " ");
+				if (query != null) {
+					query = query.replaceAll(" +", " ");
 				}
 			} catch (Exception e) {
 				return null;
 			}
 		}
 
-		return sql;
+		return query;
 	}
 
 	/**
@@ -338,30 +372,33 @@ public class SqlBuilder {
 	/**
 	 * 限制查询条数的SQL
 	 * 
-	 * @param sql SQL语句
+	 * @param query SQL语句
 	 * @param offset SQL查询偏移记录数
 	 * @param length SQL目标数量
 	 * @param dbType 数据库类型 oralce ,mysql
 	 * 
 	 * @return 限制查询条数的SQL
 	 */
-	public static String getLimitSQL(String sql, long offset, long length, String dbType) {
-		sql = sql.trim();
-		if (StringUtils.startsWithIgnoreCase(sql, "select")) {
+	public static String getLimitSQL(String query, long offset, long length, String dbType) {
+		if (query == null) {
+			return null;
+		}
+		query = query.trim();
+		if (StringUtils.startsWithIgnoreCase(query, "select")) {
 			boolean isForUpdate = false;
-			if (sql.toLowerCase().endsWith(" for update")) {
-				sql = sql.substring(0, sql.length() - 11);
+			if (query.toLowerCase().endsWith(" for update")) {
+				query = query.substring(0, query.length() - 11);
 				isForUpdate = true;
 			}
 
-			StringBuffer pagingSelect = new StringBuffer(sql.length() + 100);
+			StringBuffer pagingSelect = new StringBuffer(query.length() + 100);
 			if (dbType.equalsIgnoreCase("oracle")) {
 				if (offset > 0) {
 					pagingSelect.append("select * from ( select row_.*, rownum rownum_ from ( ");
 				} else {
 					pagingSelect.append("select * from ( ");
 				}
-				pagingSelect.append(sql);
+				pagingSelect.append(query);
 				if (offset > 0) {
 					pagingSelect.append(String.format(" ) row_ where rownum <= %d) where rownum_ > %d",
 							length + offset, offset));
@@ -370,7 +407,7 @@ public class SqlBuilder {
 				}
 			} else if (dbType.equalsIgnoreCase("mysql")) {
 				pagingSelect.append("select * from ( ");
-				pagingSelect.append(sql);
+				pagingSelect.append(query);
 				pagingSelect.append(String.format(" ) t limit %d, %d", offset, length));
 			}
 
@@ -380,22 +417,25 @@ public class SqlBuilder {
 
 			return pagingSelect.toString();
 		}
-		return sql;
+		return query;
 	}
 
 	/**
 	 * 获得查询SQL中可返回的结果数量的SQL语句
 	 * 
-	 * @param sql 原SQL语句
+	 * @param query 原SQL语句
 	 * 
 	 * @return SQL可返回的结果数量SQL语句
 	 */
-	public static String getCountSQL(String sql) {
-		sql = sql.trim();
-		if (StringUtils.startsWithIgnoreCase(sql, "select")) {
-			StringBuffer pagingSelect = new StringBuffer(sql.length() + 30);
+	public static String getCountSQL(String query) {
+		if (query == null) {
+			return null;
+		}
+		query = query.trim();
+		if (StringUtils.startsWithIgnoreCase(query, "select")) {
+			StringBuffer pagingSelect = new StringBuffer(query.length() + 30);
 			pagingSelect.append("select count(*) from ( ");
-			pagingSelect.append(sql);
+			pagingSelect.append(query);
 			pagingSelect.append(" ) t");
 			return pagingSelect.toString();
 		}

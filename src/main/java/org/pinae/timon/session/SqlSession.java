@@ -6,6 +6,7 @@ import java.util.List;
 import org.pinae.timon.session.executor.SqlExecutor;
 import org.pinae.timon.session.executor.SqlMetadata;
 import org.pinae.timon.session.handle.ResultHandler;
+import org.pinae.timon.sql.Sql;
 
 public interface SqlSession {
 	
@@ -15,33 +16,33 @@ public interface SqlSession {
 	
 	public SqlExecutor getExecutor();
 	
-	public Object[] one(String sql) ;
+	public Object[] one(Sql sql) ;
 	
-	public Object[] one(String sql, ResultHandler handler);
+	public Object[] one(Sql sql, ResultHandler handler);
 	
-	public <T> T one(String sql, Class<T> clazz);
+	public <T> T one(Sql sql, Class<T> clazz);
 	
-	public <T> T one(String sql, Class<T> clazz, ResultHandler handler);
+	public <T> T one(Sql sql, Class<T> clazz, ResultHandler handler);
 	
-	public <T> T one(String sql, String[] columns, Class<T> clazz);
+	public <T> T one(Sql sql, String[] columns, Class<T> clazz);
 	
-	public <T> T one(String sql, String[] columns, Class<T> clazz, ResultHandler handler); 
+	public <T> T one(Sql sql, String[] columns, Class<T> clazz, ResultHandler handler); 
 
-	public List<Object[]> select(String sql);
+	public List<Object[]> select(Sql sql);
 	
-	public List<Object[]> select(String sql, ResultHandler handler);
+	public List<Object[]> select(Sql sql, ResultHandler handler);
 	
-	public List<?> select(String sql, String[] columns, Class<?> clazz);
+	public List<?> select(Sql sql, String[] columns, Class<?> clazz);
 	
-	public List<?> select(String sql, String[] columns, Class<?> clazz, ResultHandler handler);
+	public List<?> select(Sql sql, String[] columns, Class<?> clazz, ResultHandler handler);
 	
-	public List<?> select(String sql, Class<?> clazz);
+	public List<?> select(Sql sql, Class<?> clazz);
 	
-	public List<?> select(String sql, Class<?> clazz, ResultHandler handler);
+	public List<?> select(Sql sql, Class<?> clazz, ResultHandler handler);
 	
-	public long count(String sql);
+	public long count(Sql sql);
 
-	public boolean execute(String sql);
+	public boolean execute(Sql sql);
 
 	public boolean execute(List<String> sqlList);
 	
@@ -53,5 +54,5 @@ public interface SqlSession {
 	
 	public boolean isClosed();
 
-	public String[] getColumnsBySql(String sql);
+	public String[] getColumnsBySql(Sql sql);
 }

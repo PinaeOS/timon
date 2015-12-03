@@ -9,7 +9,7 @@ import org.pinae.nala.xb.annotation.ElementValue;
 import org.pinae.nala.xb.annotation.Root;
 
 /**
- * SQL映射
+ * SQL配置文件映射对象
  * 
  * @author huiyugeng
  *
@@ -18,6 +18,9 @@ import org.pinae.nala.xb.annotation.Root;
 public class SqlMapper {
 	@Attribute(name="namespaces")
 	private String namespaces;
+	
+	@Element(name = "env")
+	private List<Env> envList = new ArrayList<Env>();
 	
 	@Element(name = "import")
 	private List<Import> importList = new ArrayList<Import>();
@@ -29,7 +32,7 @@ public class SqlMapper {
 	private List<GlobalVar> globalVarList = new ArrayList<GlobalVar>();
 
 	@Element(name = "sql")
-	private List<SQL> sqlList = new ArrayList<SQL>();
+	private List<SqlObject> sqlList = new ArrayList<SqlObject>();
 	
 	public String getNamespaces() {
 		return namespaces;
@@ -39,11 +42,19 @@ public class SqlMapper {
 		this.namespaces = namespace;
 	}
 
-	public List<SQL> getSqlList() {
+	public List<Env> getEnvList() {
+		return envList;
+	}
+
+	public void setEnvList(List<Env> envList) {
+		this.envList = envList;
+	}
+
+	public List<SqlObject> getSqlList() {
 		return sqlList;
 	}
 
-	public void addSql(SQL sql) {
+	public void addSql(SqlObject sql) {
 		this.sqlList.add(sql);
 	}
 
@@ -69,6 +80,32 @@ public class SqlMapper {
 
 	public void addScript(Script script) {
 		this.scriptList.add(script);
+	}
+	
+	public class Env {
+		@Attribute(name = "key")
+		private String key; // 环境变量键
+		
+		@Attribute(name = "value")
+		private String value; // 环境变量值
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+		
+		
 	}
 
 	public class Import {
@@ -135,9 +172,12 @@ public class SqlMapper {
 		
 	}
 
-	public class SQL {
+	public class SqlObject {
 		@Attribute(name = "name")
 		private String name; // SQL名称
+		
+		@Attribute(name = "prepare")
+		private boolean prepare; // 是否使用预编译SQL
 
 		@Element(name = "choose")
 		private List<Choose> chooseList = new ArrayList<Choose>(); // 选择条件
@@ -151,6 +191,14 @@ public class SqlMapper {
 
 		public void setName(String name) {
 			this.name = name;
+		}
+
+		public boolean isPrepare() {
+			return prepare;
+		}
+
+		public void setPrepare(boolean prepare) {
+			this.prepare = prepare;
 		}
 
 		public List<Choose> getChooseList() {
@@ -173,11 +221,11 @@ public class SqlMapper {
 			@Attribute(name = "when")
 			private String when; // 选择条件
 			
-			@Attribute(name = "statement")
-			private String statement; //替换子句
+			@Attribute(name = "block")
+			private String block; //替换位置
 
 			@ElementValue
-			private String value; // 条件值ß
+			private String value; // 条件值
 
 			public String getWhen() {
 				return when;
@@ -187,12 +235,12 @@ public class SqlMapper {
 				this.when = when;
 			}
 
-			public String getStatement() {
-				return statement;
+			public String getBlock() {
+				return block;
 			}
 
-			public void setStatement(String statement) {
-				this.statement = statement;
+			public void setBlock(String block) {
+				this.block = block;
 			}
 
 			public String getValue() {

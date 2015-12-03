@@ -94,6 +94,10 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 		}
 	}
 	
+	public static ConfigMap<String, String> load(String filename) throws IOException {
+		return load(new File(filename));
+	}
+	
 	public static ConfigMap<String, String> load(File file) throws IOException {
 		
 		if (file == null) {
