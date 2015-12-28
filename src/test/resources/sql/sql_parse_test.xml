@@ -1,11 +1,77 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <mapper namespaces="org.timon.test.parser">
+
 	<sql name="parseSelectS1">
+		select * from person where name = 'Hui'
+	</sql>
+	
+	<sql name="parseSelectS2">
+		select * from person where department_id in (select department_id from department where department_name = 'BOSS') and deleteflag = 0
+	</sql>
+
+	<sql name="parseSelectS3">
 		select t1.name, t1.password, t1.age, t2.department from 
 			user t1, department t2 where t1.department_id = t2.id
 		union
 		select t1.name, t1.password, t1.age, t1.department 
 			from (select * from user_temp) t1
 	</sql>
+	
+	<sql name="parseInsertS1">
+		insert into person(id, name, age) values (1, 'Hui', 31)
+	</sql>
+	
+	<sql name="parseInsertS2">
+		insert into person_bak select * from person 
+	</sql>
+	
+	<sql name="parseDeleteS1">
+		delete from person where department_id in (select department_id from department where department_name = 'BOSS') and deleteflag = 0
+	</sql>
+	
+	<sql name="parseUpdateS1">
+		update person set age = 28 where department_id in (select department_id from department where department_name = 'BOSS') and deleteflag = 0
+	</sql>
+	
+	<sql name="parseCreateTableS1">
+		create table `person` (
+		  `id` int(10) NOT NULL AUTO_INCREMENT,
+		  `name` varchar(64) COLLATE utf8_unicode_ci DEFAULT NULL,
+		  `age` int(1) DEFAULT 0,
+		  `phone` varchar(32) COLLATE utf8_unicode_ci DEFAULT NULL,
+		  PRIMARY KEY (`id`)
+		) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+
+	</sql>
+	
+	<sql name="parseCreateTableS2">
+		create table `person_tmp` as select * from person where deleteflag = false
+	</sql>
+	
+	<sql name="parseCreateViewS1">
+		create view view_person as
+		    select t1.name, t1.age, t1.phone
+		    from person t1, department t2
+		    where t1.department_id = t2.department_id
+		    and t2.deleteflag = 0
+		    and t1.deleteflag = 0 
+	</sql>
+	
+	<sql name="parseAlertS1">
+		alter table `person` add column `address` TEXT
+	</sql>
+	
+	<sql name="parseAlertS2">
+		alter table `person` drop column `address`
+	</sql>
+	
+	<sql name="parseDropS1">
+		drop table person
+	</sql>
+	
+	<sql name="parseDropS2">
+		drop view view_person
+	</sql>
+	
 </mapper>
