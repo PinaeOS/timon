@@ -24,7 +24,7 @@ import org.pinae.timon.sql.SqlBuilder;
 import org.pinae.timon.util.ConfigMap;
 
 /**
- * 数据库会话管理
+ * 默认数据库会话管理
  * 
  * @author Huiyugeng
  *
@@ -282,11 +282,18 @@ public class DefaultSqlSession implements SqlSession {
 		return this.executor.execute(sql);
 	}
 
-	public boolean execute(List<String> sqlList) {
-		for (String sql : sqlList) {
+	public int[] execute(Iterable<String> sqls) {
+		return this.execute(sqls, 0);
+	}
+	
+	public int[] execute(Iterable<String> sqls, int batchSize) {
+		if (sqls == null) {
+			return null;
+		}
+		for (String sql : sqls) {
 			printSql(new Sql(sql));
 		}
-		return this.executor.execute(sqlList);
+		return this.executor.execute(sqls, batchSize);
 	}
 
 	public void commit() {
@@ -348,5 +355,6 @@ public class DefaultSqlSession implements SqlSession {
 			}
 		}
 	}
+
 
 }

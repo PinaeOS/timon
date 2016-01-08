@@ -8,6 +8,12 @@ import org.pinae.timon.session.executor.SqlMetadata;
 import org.pinae.timon.session.handle.ResultHandler;
 import org.pinae.timon.sql.Sql;
 
+/**
+ * 数据库会话管理
+ * 
+ * @author Huiyugeng
+ *
+ */
 public interface SqlSession {
 	
 	public Connection getConnection();
@@ -44,7 +50,9 @@ public interface SqlSession {
 
 	public boolean execute(Sql sql);
 
-	public boolean execute(List<String> sqlList);
+	public int[] execute(Iterable<String> sqls);
+	
+	public int[] execute(Iterable<String> sqls, int batchSize);
 	
 	public void commit();
 

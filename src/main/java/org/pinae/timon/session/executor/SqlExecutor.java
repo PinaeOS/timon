@@ -106,24 +106,27 @@ public class SqlExecutor extends SqlStatement {
 
 		return result;
 	}
-
-	public boolean execute(List<String> sqlList) {
-
-		if (sqlList == null || sqlList.size() == 0) {
-			return false;
+	
+	public int[] execute(Iterable<String> sqls, int batchSize) {
+		if (sqls == null) {
+			return null;
 		}
-
-		boolean result = false;
-
+		
+		List<int[]> tmpResultList = new ArrayList<int[]>();
+		
 		Statement stmt = null;
-
 		try {
+			int counter = 0;
 			stmt = conn.createStatement();
-			for (String sql : sqlList) {
+			for (String sql : sqls) {
 				stmt.addBatch(sql);
+				counter ++;
+				if (batchSize > 0 && counter % batchSize == 0) {
+					tmpResultList.add(stmt.executeBatch());
+				}
 			}
-			stmt.executeBatch();
-			result = true;
+			tmpResultList.add(stmt.executeBatch());
+
 		} catch (SQLException e) {
 			logger.error(String.format("execute Exception: exception=%s", e.getMessage()));
 		} finally {
@@ -134,6 +137,16 @@ public class SqlExecutor extends SqlStatement {
 			} catch (SQLException e) {
 				logger.error(e.getMessage());
 			}
+		}
+		
+		int[] result = new int[0];
+		for (int[] tmpResult : tmpResultList) {
+			int[] tmpArray = new int[result.length + tmpResult.length];
+			
+			System.arraycopy(result, 0, tmpArray, 0, result.length);
+			System.arraycopy(tmpResult, 0, tmpArray, result.length, tmpResult.length);
+			
+			result = tmpArray;
 		}
 
 		return result;
