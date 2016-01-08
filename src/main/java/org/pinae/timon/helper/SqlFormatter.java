@@ -82,7 +82,6 @@ public class SqlFormatter {
 		boolean beginLine = true;
 		boolean afterBeginBeforeEnd = false;
 		boolean afterByOrSetOrFromOrSelect = false;
-		boolean afterValues = false;
 		boolean afterOn = false;
 		boolean afterBetween = false;
 		boolean afterInsert = false;
@@ -250,7 +249,6 @@ public class SqlFormatter {
 			}
 		}
 
-		@SuppressWarnings({ "UnnecessaryBoxing" })
 		private void select() {
 			out();
 			indent++;
@@ -303,10 +301,8 @@ public class SqlFormatter {
 			out();
 			indent++;
 			newline();
-			afterValues = true;
 		}
 
-		@SuppressWarnings({ "UnnecessaryUnboxing" })
 		private void closeParen() {
 			parensSinceSelect--;
 			if (parensSinceSelect < 0) {
