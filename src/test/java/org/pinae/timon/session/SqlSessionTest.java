@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,34 @@ public abstract class SqlSessionTest {
 			List<String> initSqlList = SqlSessionTest.builder.getScript("INIT_SCRIPT");
 			SqlSession session = sessionFactory.getSession();
 			session.execute(initSqlList);
+			
+			List<String> sqlList = new ArrayList<String>();
+			
+			Map<String, Object> row1 = new HashMap<String, Object>();
+			row1.put("id", 1);
+			row1.put("name", "Huiyugeng");
+			row1.put("age", 31);
+			row1.put("phone", "13630183186");
+			
+			Map<String, Object> row2 = new HashMap<String, Object>();
+			row2.put("id", 2);
+			row2.put("name", "Experanza");
+			row2.put("age", 28);
+			row2.put("phone", "13343351822");
+
+			
+			Map<String, Object> row3 = new HashMap<String, Object>();
+			row3.put("id", 3);
+			row3.put("name", "Zhang");
+			row3.put("age", 58);
+			row3.put("phone", "13391562775");
+			
+			sqlList.add(SqlSessionTest.builder.getSQLByNameWithParameters("INSERT_PERSON", row1).getSql());
+			sqlList.add(SqlSessionTest.builder.getSQLByNameWithParameters("INSERT_PERSON", row2).getSql());
+			sqlList.add(SqlSessionTest.builder.getSQLByNameWithParameters("INSERT_PERSON", row3).getSql());
+			
+			session.execute(sqlList, 2);
+			
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

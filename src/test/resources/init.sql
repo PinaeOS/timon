@@ -14,5 +14,3 @@ CREATE TABLE `person` (
   `phone` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
-
-INSERT INTO `person` VALUES (1,'Huiyugeng',31,'13630183186'),(2,'Experanza',28,'13343351822'),(3,'Zhang',57,'13391562775');

@@ -46,7 +46,7 @@
 		</choose>
 	</sql>
 	
-	<sql name="INSERT_PERSON" prepare="true">
+	<sql name="INSERT_PERSON">
 		insert into :table(id, name, age, phone) values (:id, :name, :age, :phone)
 	</sql>
 	

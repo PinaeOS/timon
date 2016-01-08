@@ -1,6 +1,7 @@
 package org.pinae.timon.session;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -10,8 +11,40 @@ import java.sql.SQLException;
 import org.junit.Test;
 import org.pinae.timon.session.defaults.DefaultSqlSessionFactory;
 import org.pinae.timon.session.handle.ConnectionHandler;
+import org.pinae.timon.util.ConfigMap;
 
 public class SqlSessionFactoryTest {
+	
+	@Test
+	public void testTestConnection() {
+		try {
+			SqlSessionFactory sessionFactory = new DefaultSqlSessionFactory();
+			assertTrue(sessionFactory.testConnection());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		try {
+			SqlSessionFactory sessionFactory = new DefaultSqlSessionFactory("jdbc", "com.mysql.jdbc.Driver", 
+					"jdbc:mysql://127.0.0.1:3306/test", "test", "test");
+			assertTrue(sessionFactory.testConnection());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+		
+		try {
+			ConfigMap<String, String> datasource = new ConfigMap<String, String>();
+			datasource.put("type", "jdbc");
+			datasource.put("driver", "com.mysql.jdbc.Driver");
+			datasource.put("url", "jdbc:mysql://127.0.0.1:3306/test");
+			datasource.put("user", "test");
+			datasource.put("password", "test");
+			SqlSessionFactory sessionFactory = new DefaultSqlSessionFactory(datasource);
+			assertTrue(sessionFactory.testConnection());
+		} catch (IOException e) {
+			fail(e.getMessage());
+		}
+	}
 
 	@Test
 	public void testGetSession() {
