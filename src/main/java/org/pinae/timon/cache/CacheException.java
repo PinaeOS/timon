@@ -8,36 +8,20 @@ package org.pinae.timon.cache;
  */
 public class CacheException extends Exception {
 
-	private static final long serialVersionUID = 8423714358000052785L;
-	/**
-	 * 构造函数
-	 *
-	 */
+	private static final long serialVersionUID = 1L;
+
 	public CacheException() {
 		super();
 	}
-	/**
-	 * 构造函数
-	 * 
-	 * @param message 异常提示
-	 * @param cause 异常引发原因
-	 */
-	public CacheException(String msg, Throwable cause) {
-		super(msg, cause);
+
+	public CacheException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	/**
-	 * 构造函数
-	 * 
-	 * @param message 异常提示
-	 */
-	public CacheException(String msg) {
-		super(msg);
+
+	public CacheException(String message) {
+		super(message);
 	}
-	/**
-	 * 构造函数
-	 * 
-	 * @param cause 异常引发原因
-	 */
+
 	public CacheException(Throwable cause) {
 		super(cause);
 	}

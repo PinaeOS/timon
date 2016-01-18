@@ -16,7 +16,7 @@ import org.pinae.timon.sql.Sql;
 /**
  * 数据库访问执行器
  * 
- * @author huiyugeng
+ * @author Huiyugeng
  *
  */
 public class SqlExecutor extends SqlStatement {

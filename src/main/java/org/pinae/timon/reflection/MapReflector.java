@@ -17,12 +17,12 @@ import org.apache.commons.lang3.StringUtils;
 public class MapReflector implements Reflector {
 
 	/**
-	 * 将查询结果映射成为List<Map>
+	 * 将查询结果映射成为List
 	 * 
 	 * @param table 查询结果
 	 * @param columns 列名（按查询结果顺序）
 	 * 
-	 * @return 映射后的List<Map>
+	 * @return 映射后的List
 	 */
 	public List<Map<String, Object>> toList(List<Object[]> table, String[] columns) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
@@ -39,13 +39,13 @@ public class MapReflector implements Reflector {
 	}
 
 	/**
-	 * 将查询结果映射成为List<Map>，并支持当字段为空值时进行默认值设定
+	 * 将查询结果映射成为List，并支持当字段为空值时进行默认值设定
 	 * 
 	 * @param table 查询结果
 	 * @param columns 列名（按查询结果顺序）
 	 * @param defaultMap 默认值
 	 * 
-	 * @return 映射后的List<Map>
+	 * @return 映射后的List
 	 */
 	public List<Map<String, Object>> toList(List<Object[]> table, String[] columns, Map<String, Object> defaultMap) {
 		List<Map<String, Object>> resultList = toList(table, columns);

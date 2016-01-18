@@ -15,7 +15,7 @@ public class JDBCDataSource implements DataSource {
 	/**
 	 * 构造函数
 	 * 
-	 * @param filename JDBC配置文件名
+	 * @param datasource JDBC配置信息
 	 */
 	public JDBCDataSource(ConfigMap<String, String> datasource) {
 		this.datasource = datasource;
@@ -26,7 +26,7 @@ public class JDBCDataSource implements DataSource {
 	 * 
 	 * @return 数据库连接
 	 * 
-	 * @throws IOException 
+	 * @throws IOException 数据库连接异常
 	 */
 	public Connection getConnection() throws IOException {
 		Connection conn = null;

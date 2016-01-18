@@ -46,7 +46,8 @@ public class CacheFactory {
 	 * @param type 缓存类别
 	 * 
 	 * @return 生成的缓存对象
-	 * @throws CacheException 异常处理
+	 * 
+	 * @throws CacheException 缓存异常
 	 */
 	public Cache createCache(String name, CacheConfiguration config, int type) throws CacheException {
 		if (config == null) {
@@ -79,7 +80,8 @@ public class CacheFactory {
 	 * @param name 缓存名称
 	 * 
 	 * @return 生成的缓存对象
-	 * @throws CacheException 异常处理
+	 * 
+	 * @throws CacheException 缓存异常
 	 */
 	public Cache createCache(String name) throws CacheException {
 		SynchronizedCacheConfiguration config = new SynchronizedCacheConfiguration();
@@ -90,8 +92,10 @@ public class CacheFactory {
 	 * 生成名为defalt的缓存
 	 * 
 	 * @param config 缓存配置
+	 * 
 	 * @return 生成的缓存对象
-	 * @throws CacheException 异常处理
+	 * 
+	 * @throws CacheException 缓存异常
 	 */
 	public Cache createCache(CacheConfiguration config) throws CacheException {
 		return createCache("default", config);
@@ -104,7 +108,8 @@ public class CacheFactory {
 	 * @param config 缓存配置
 	 * 
 	 * @return 生成的缓存对象
-	 * @throws CacheException
+	 * 
+	 * @throws CacheException 缓存异常
 	 */
 	public Cache createCache(String name, CacheConfiguration config) throws CacheException {
 		
@@ -134,6 +139,7 @@ public class CacheFactory {
 	 * 从缓存池中获取指定名称的缓存
 	 * 
 	 * @param name 缓存名称
+	 * 
 	 * @return 指定的缓存
 	 */
 	public Cache getCache(String name) {

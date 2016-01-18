@@ -56,7 +56,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	 * 
 	 * @param file 配置文件
 	 * 
-	 * @throws IOException
+	 * @throws IOException 配置文件IO异常
 	 */
 	public DefaultSqlSessionFactory(File file) throws IOException {
 		if (file == null) {
@@ -71,7 +71,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	 * 
 	 * @param filename 配置文件路径
 	 * 
-	 * @throws IOException
+	 * @throws IOException 配置文件IO异常
 	 */
 	public DefaultSqlSessionFactory(String filename) throws IOException {
 		if (StringUtils.isBlank(filename)) {
@@ -96,7 +96,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	 * @param user 数据库连接用户名
 	 * @param password 数据库连接密码
 	 * 
-	 * @throws IOException
+	 * @throws IOException 配置信息IO异常
 	 */
 	public DefaultSqlSessionFactory(String type, String driver, String url, String user, String password) throws IOException {
 		// 设置数据库数据源属性
@@ -117,7 +117,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	 * 
 	 * @param datasource 数据源配置信息
 	 * 
-	 * @throws IOException
+	 * @throws IOException 配置信息IO异常
 	 */
 	public DefaultSqlSessionFactory(ConfigMap<String, String> datasource) throws IOException {
 		this.configMap = datasource;

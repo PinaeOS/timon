@@ -1,8 +1,15 @@
 package org.pinae.timon.cache;
 
+/**
+ * 缓存抽象类
+ * 
+ * @author Huiyugeng
+ *
+ */
 public abstract class AbstractCache implements Cache {
 	
-	protected CacheInformation info; // 缓存信息
+	/* 缓存信息 */
+	protected CacheInformation info;
 	
 	public AbstractCache(String name) {
 		this.info = new CacheInformation(name);

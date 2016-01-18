@@ -50,9 +50,9 @@ public class DefaultSqlSession implements SqlSession {
 	 * 
 	 * @param conn 数据库连接
 	 * @param cache SQL缓存
-	 * @param config 数据库配置信息
+	 * @param sessionConfig 数据库配置信息
 	 * 
-	 * @throws IOException IO异常
+	 * @throws IOException 数据库IO异常
 	 */
 	public DefaultSqlSession(Connection conn, Cache cache, ConfigMap<String, String> sessionConfig) throws IOException {
 
@@ -339,19 +339,15 @@ public class DefaultSqlSession implements SqlSession {
 			if (!StringUtils.containsAny(level, "DEBUG", "INFO", "WARN", "ERROR")) {
 				level = "DEBUG";
 			}
-			switch (level) {
-			case "DEBUG":
+			
+			if (level.equals("DEBUG")) {
 				logger.debug(query);
-				break;
-			case "INFO":
+			} else if (level.equals("INFO")) {
 				logger.info(query);
-				break;
-			case "WARN":
+			} else if (level.equals("WARN")) {
 				logger.warn(query);
-				break;
-			case "ERROR":
+			} else if (level.equals("ERROR")) {
 				logger.error(query);
-				break;
 			}
 		}
 	}

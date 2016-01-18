@@ -24,7 +24,7 @@ public interface SqlSessionFactory {
 	 * 
 	 * @return 数据库会话
 	 * 
-	 * @throws IOException
+	 * @throws IOException 数据库IO异常
 	 */
 	public SqlSession getSession() throws IOException;
 	
@@ -34,7 +34,7 @@ public interface SqlSessionFactory {
 	 * @param handler 连接处理类
 	 * @return 数据库会话
 	 * 
-	 * @throws IOException
+	 * @throws IOException 数据库IO异常
 	 */
 	public SqlSession getSession(ConnectionHandler handler) throws IOException;
 }
