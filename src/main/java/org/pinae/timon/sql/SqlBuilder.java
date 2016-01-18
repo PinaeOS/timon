@@ -214,7 +214,7 @@ public class SqlBuilder {
 		String query = sqlObj.getValue();
 		
 		if (query != null) {
-			String regexs = "[$][{](\\w*)[}]"; //子句替换模式
+			String regexs = "[$][{](\\S*)[}]"; //子句替换模式
 			Pattern regex = Pattern.compile(regexs);
 			Matcher regexMatcher = regex.matcher(query);
 			while (regexMatcher.find()) {
