@@ -118,34 +118,40 @@ public class SqlBuilder {
 	
 	/*
 	 * 构建预编译SQL所需要的SQL和变量
+	 * 
+	 * 将<key, value> 的值对转换为 PreperedStatement使用的<index, value>
 	 */
 	private Sql getPreperSQLWithParameters(String query, Map<String, Object> parameters) {
-		
+		// 检索query语句中所有:key的标记
 		Pattern pattern = Pattern.compile(":\\w+");
 		Matcher matcher = pattern.matcher(query);
 		
+		// 构建<key, index>值对
 		int index = 1;
-		Map<String, Integer> keyIndex = new HashMap<String, Integer>();
+		Map<String, Integer> keyIndexs = new HashMap<String, Integer>();
 		while (matcher.find()) {
 			String word = matcher.group();
 			if (word.startsWith(":")) {
-				keyIndex.put(word.substring(1), index++);
+				keyIndexs.put(word.substring(1), index++);
 			}
 		}
 		
+		// 构建<index, value>值对
 		Map<Integer, Object> prepareValue = new HashMap<Integer, Object>();
 		Set<String> paramKeySet = parameters.keySet();
 		for (String paramKey : paramKeySet) {
-			Integer preIndex = keyIndex.get(paramKey);
+			Integer preIndex = keyIndexs.get(paramKey);
 			Object preValue = parameters.get(paramKey);
 			
 			prepareValue.put(preIndex, preValue);
 		}
 		
+		//替换所有的变量为"?"
 		query = matcher.replaceAll("?");
 		
 		Sql sql = new Sql(query, parameters);
 		sql.setPreperStatement(true);
+		sql.setKeyIndexs(keyIndexs);
 		sql.setPreperValues(prepareValue);
 		
 		return sql;
