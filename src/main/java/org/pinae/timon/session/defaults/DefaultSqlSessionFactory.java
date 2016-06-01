@@ -123,6 +123,24 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		this.configMap = datasource;
 		createInstance();
 	}
+	
+	/**
+	 * 构建函数
+	 * 
+	 * @param connection 数据库连接
+	 * 
+	 * @throws IOException 数据库连接异常
+	 */
+	public DefaultSqlSessionFactory(final Connection connection) throws IOException {
+		if (connection != null) {
+			this.datasource = new DataSource() {
+				@Override
+				public Connection getConnection() throws IOException {
+					return connection;
+				}
+			};
+		}
+	}
 
 	private void createCache() throws IOException {
 
