@@ -134,7 +134,6 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	public DefaultSqlSessionFactory(final Connection connection) throws IOException {
 		if (connection != null) {
 			this.datasource = new DataSource() {
-				@Override
 				public Connection getConnection() throws IOException {
 					return connection;
 				}
