@@ -25,11 +25,25 @@ public class SqlExecutor extends SqlStatement {
 	
 	private Connection conn = null;
 	
-	public SqlExecutor(Connection conn) {
-		this.conn = conn;
+	public SqlExecutor(Connection conn) throws NullPointerException {
+		if (conn != null) {
+			this.conn = conn;
+		} else {
+			throw new NullPointerException("Connection is NULL");
+		}
 	}
 
+	
+	/**
+	 * 执行SQL查询
+	 * 
+	 * @param sql 需要执行的查询SQL语句对象
+	 * 
+	 * @return 查询结果列表
+	 */
 	public List<Object[]> select(Sql sql) {
+		
+		long start =  System.currentTimeMillis();
 		
 		if (sql.validate() == false) {
 			return null;
@@ -76,10 +90,23 @@ public class SqlExecutor extends SqlStatement {
 				}
 			}
 		}
+		
+		logger.debug(String.format("Execute %s used %d ms", sql.getSql(), System.currentTimeMillis() - start));
+		
 		return dataList;
 	}
 	
+	/**
+	 * 执行非查询 SQL语句
+	 * 
+	 * @param sql 需要执行的非查询SQL语句对象(insert/update/delete)
+	 * 
+	 * @return 是否执行成功
+	 */
 	public boolean execute(Sql sql) {
+		
+		long start =  System.currentTimeMillis();
+		
 		if (sql.validate() == false) {
 			return false;
 		}
@@ -103,10 +130,20 @@ public class SqlExecutor extends SqlStatement {
 				logger.error(e.getMessage(), e);
 			}
 		}
+		
+		logger.debug(String.format("Execute %s used %d ms", sql.getSql(), System.currentTimeMillis() - start));
 
 		return result;
 	}
 	
+	/**
+	 * 批量执行SQL语句 
+	 * 
+	 * @param sqls SQL语句集合
+	 * @param batchSize 每批次执行数量
+	 * 
+	 * @return 批量执行结果
+	 */
 	public int[] execute(Iterable<String> sqls, int batchSize) {
 		if (sqls == null) {
 			return null;
@@ -152,6 +189,9 @@ public class SqlExecutor extends SqlStatement {
 		return result;
 	}
 	
+	/**
+	 * SQL事务: 提交
+	 */
 	public void commit() {
 		try {
 			conn.commit();
@@ -160,6 +200,9 @@ public class SqlExecutor extends SqlStatement {
 		}
 	}
 
+	/**
+	 * SQL事务: 回滚
+	 */
 	public void rollback() {
 		try {
 			conn.rollback();
@@ -168,6 +211,9 @@ public class SqlExecutor extends SqlStatement {
 		}
 	}
 
+	/**
+	 * 关闭数据库连接
+	 */
 	public void close() {
 		try {
 			conn.close();
@@ -176,6 +222,11 @@ public class SqlExecutor extends SqlStatement {
 		}
 	}
 	
+	/**
+	 * 判断数据库连接是否关闭
+	 * 
+	 * @return 数据库是否关闭
+	 */
 	public boolean isClosed() {
 		try {
 			if (conn != null) {
