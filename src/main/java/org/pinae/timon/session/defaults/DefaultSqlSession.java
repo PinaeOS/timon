@@ -3,6 +3,7 @@ package org.pinae.timon.session.defaults;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -90,7 +91,7 @@ public class DefaultSqlSession implements SqlSession {
 		return this.executor;
 	}
 
-	public Object[] one(Sql sql, ResultHandler handler) {
+	public Object[] one(Sql sql, ResultHandler handler) throws SQLException {
 		Object[] result = null;
 		List<Object[]> table = select(sql);
 		if (table != null && table.size() > 0) {
@@ -102,12 +103,12 @@ public class DefaultSqlSession implements SqlSession {
 		return result;
 	}
 
-	public Object[] one(Sql sql) {
+	public Object[] one(Sql sql) throws SQLException {
 		return one(sql, (ResultHandler) null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T one(Sql sql, Class<T> clazz, ResultHandler handler) {
+	public <T> T one(Sql sql, Class<T> clazz, ResultHandler handler) throws SQLException {
 		T result = null;
 		List<?> table = select(sql, clazz);
 		if (table != null && table.size() > 0) {
@@ -119,12 +120,12 @@ public class DefaultSqlSession implements SqlSession {
 		return result;
 	}
 
-	public <T> T one(Sql sql, Class<T> clazz) {
+	public <T> T one(Sql sql, Class<T> clazz) throws SQLException {
 		return one(sql, clazz, null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T one(Sql sql, String[] columns, Class<T> clazz, ResultHandler handler) {
+	public <T> T one(Sql sql, String[] columns, Class<T> clazz, ResultHandler handler) throws SQLException {
 		T result = null;
 		List<?> table = select(sql, columns, clazz);
 		if (table != null && table.size() > 0) {
@@ -140,12 +141,12 @@ public class DefaultSqlSession implements SqlSession {
 		return one(sql, columns, clazz);
 	}
 
-	public List<Object[]> select(Sql sql) {
+	public List<Object[]> select(Sql sql) throws SQLException {
 		return select(sql, (ResultHandler) null);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object[]> select(Sql sql, ResultHandler handler) {
+	public List<Object[]> select(Sql sql, ResultHandler handler) throws SQLException {
 
 		if (StringUtils.isBlank(sql.getSql())) {
 			throw new NullPointerException("SQL is NULL");
@@ -201,7 +202,7 @@ public class DefaultSqlSession implements SqlSession {
 		return queryResult;
 	}
 
-	public List<?> select(Sql sql, String[] columns, Class<?> clazz, ResultHandler handler) {
+	public List<?> select(Sql sql, String[] columns, Class<?> clazz, ResultHandler handler) throws SQLException {
 		List<Object[]> dataList = select(sql, handler);
 
 		if (clazz == null) {
@@ -231,20 +232,20 @@ public class DefaultSqlSession implements SqlSession {
 		return table;
 	}
 
-	public List<?> select(Sql sql, String[] columns, Class<?> clazz) {
+	public List<?> select(Sql sql, String[] columns, Class<?> clazz) throws SQLException {
 		return select(sql, columns, clazz, null);
 	}
 
-	public List<?> select(Sql sql, Class<?> clazz, ResultHandler handler) {
+	public List<?> select(Sql sql, Class<?> clazz, ResultHandler handler) throws SQLException {
 		String columns[] = getColumnsBySql(sql);
 		return select(sql, columns, clazz, handler);
 	}
 
-	public List<?> select(Sql sql, Class<?> clazz) {
+	public List<?> select(Sql sql, Class<?> clazz) throws SQLException {
 		return select(sql, clazz, null);
 	}
 
-	public long count(Sql sql) {
+	public long count(Sql sql) throws SQLException {
 		String query = sql.getSql();
 		if (StringUtils.isEmpty(query)) {
 			return 0;
@@ -277,16 +278,16 @@ public class DefaultSqlSession implements SqlSession {
 		return count;
 	}
 
-	public boolean execute(Sql sql) {
+	public boolean execute(Sql sql) throws SQLException {
 		printSql(sql);
 		return this.executor.execute(sql);
 	}
 
-	public int[] execute(Iterable<String> sqls) {
+	public int[] execute(Iterable<String> sqls) throws SQLException {
 		return this.execute(sqls, 0);
 	}
 	
-	public int[] execute(Iterable<String> sqls, int batchSize) {
+	public int[] execute(Iterable<String> sqls, int batchSize) throws SQLException {
 		if (sqls == null) {
 			return null;
 		}
@@ -296,23 +297,23 @@ public class DefaultSqlSession implements SqlSession {
 		return this.executor.execute(sqls, batchSize);
 	}
 
-	public void commit() {
+	public void commit() throws SQLException {
 		this.executor.commit();
 	}
 
-	public void rollback() {
+	public void rollback() throws SQLException {
 		this.executor.rollback();
 	}
 
-	public void close() {
+	public void close() throws SQLException {
 		this.executor.close();
 	}
 
-	public boolean isClosed() {
+	public boolean isClosed() throws SQLException {
 		return this.executor.isClosed();
 	}
 
-	public String[] getColumnsBySql(Sql sql) {
+	public String[] getColumnsBySql(Sql sql) throws SQLException {
 		SqlMetadata metadata = getMetadata();
 		if (metadata != null) {
 			return metadata.getColumnsBySql(sql);

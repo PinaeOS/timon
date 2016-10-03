@@ -40,8 +40,10 @@ public class SqlExecutor extends SqlStatement {
 	 * @param sql 需要执行的查询SQL语句对象
 	 * 
 	 * @return 查询结果列表
+	 * 
+	 * @throws SQLException 
 	 */
-	public List<Object[]> select(Sql sql) {
+	public List<Object[]> select(Sql sql) throws SQLException {
 		
 		long start =  System.currentTimeMillis();
 		
@@ -54,8 +56,6 @@ public class SqlExecutor extends SqlStatement {
 		if (sql.isSelect()) {
 
 			dataList = new ArrayList<Object[]>();
-			
-			String query = sql.getSql();
 			
 			ResultSet rs = null;
 			PreparedStatement stmt = null;
@@ -76,7 +76,7 @@ public class SqlExecutor extends SqlStatement {
 				}
 
 			} catch (SQLException e) {
-				logger.error(String.format("select Exception: exception=%s; sql=%s", e.getMessage(), query));
+				throw e;
 			} finally {
 				try {
 					if (rs != null && rs.isClosed() == false) {
@@ -86,7 +86,7 @@ public class SqlExecutor extends SqlStatement {
 						stmt.close();
 					}
 				} catch (SQLException e) {
-					logger.error(e.getMessage(), e);
+					throw e;
 				}
 			}
 		}
@@ -102,8 +102,10 @@ public class SqlExecutor extends SqlStatement {
 	 * @param sql 需要执行的非查询SQL语句对象(insert/update/delete)
 	 * 
 	 * @return 是否执行成功
+	 * 
+	 * @throws SQLException 
 	 */
-	public boolean execute(Sql sql) {
+	public boolean execute(Sql sql) throws SQLException {
 		
 		long start =  System.currentTimeMillis();
 		
@@ -120,7 +122,7 @@ public class SqlExecutor extends SqlStatement {
 			
 			result = true;
 		} catch (SQLException e) {
-			logger.error(String.format("execute Exception: exception=%s; sql=%s", e.getMessage(), sql));
+			throw e;
 		} finally {
 			try {
 				if (stmt != null && stmt.isClosed() == false) {
@@ -143,8 +145,10 @@ public class SqlExecutor extends SqlStatement {
 	 * @param batchSize 每批次执行数量
 	 * 
 	 * @return 批量执行结果
+	 * 
+	 * @throws SQLException 
 	 */
-	public int[] execute(Iterable<String> sqls, int batchSize) {
+	public int[] execute(Iterable<String> sqls, int batchSize) throws SQLException {
 		if (sqls == null) {
 			return null;
 		}
@@ -165,7 +169,7 @@ public class SqlExecutor extends SqlStatement {
 			tmpResultList.add(stmt.executeBatch());
 
 		} catch (SQLException e) {
-			logger.error(String.format("execute Exception: exception=%s", e.getMessage()));
+			throw e;
 		} finally {
 			try {
 				if (stmt != null && stmt.isClosed() == false) {
@@ -191,49 +195,41 @@ public class SqlExecutor extends SqlStatement {
 	
 	/**
 	 * SQL事务: 提交
+	 * 
+	 * @throws SQLException 
 	 */
-	public void commit() {
-		try {
-			conn.commit();
-		} catch (SQLException e) {
-			logger.error(String.format("commit Exception: exception=%s", e.getMessage()));
-		}
+	public void commit() throws SQLException {
+		conn.commit();
 	}
 
 	/**
 	 * SQL事务: 回滚
+	 * 
+	 * @throws SQLException 
 	 */
-	public void rollback() {
-		try {
-			conn.rollback();
-		} catch (SQLException e) {
-			logger.error(String.format("rollback Exception: exception=%s", e.getMessage()));
-		}
+	public void rollback() throws SQLException {
+		conn.rollback();
 	}
 
 	/**
 	 * 关闭数据库连接
+	 * 
+	 * @throws SQLException 
 	 */
-	public void close() {
-		try {
-			conn.close();
-		} catch (SQLException e) {
-			logger.error(String.format("close Exception: exception=%s", e.getMessage()));
-		}
+	public void close() throws SQLException {
+		conn.close();
 	}
 	
 	/**
 	 * 判断数据库连接是否关闭
 	 * 
 	 * @return 数据库是否关闭
+	 * 
+	 * @throws SQLException 
 	 */
-	public boolean isClosed() {
-		try {
-			if (conn != null) {
-				return conn.isClosed();
-			}
-		} catch (SQLException e) {
-			logger.error(String.format("isClosed Exception: exception=%s", e.getMessage()));
+	public boolean isClosed() throws SQLException {
+		if (conn != null) {
+			return conn.isClosed();
 		}
 		return true;
 	}

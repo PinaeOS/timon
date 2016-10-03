@@ -47,7 +47,7 @@ public class SqlSessionFactoryTest {
 	}
 
 	@Test
-	public void testGetSession() {
+	public void testGetSession() throws SQLException {
 		SqlSessionFactory sessionFactory = null;
 		
 		try {

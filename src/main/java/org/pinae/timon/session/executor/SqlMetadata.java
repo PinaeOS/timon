@@ -30,34 +30,32 @@ public class SqlMetadata extends SqlStatement {
 	 * @param sql SQL语句
 	 * 
 	 * @return 元数据信息
+	 * 
+	 * @throws SQLException 
 	 */
-	public List<Map<String, String>> getMetadataBySql(Sql sql) {
+	public List<Map<String, String>> getMetadataBySql(Sql sql) throws SQLException {
 		
 		List<Map<String, String>> table = new ArrayList<Map<String, String>>();
-		
-		try {
 
-			PreparedStatement ps = createStatment(conn, sql);
-			ResultSet rs = ps.executeQuery();
-			ResultSetMetaData rsme = rs.getMetaData();
+		PreparedStatement ps = createStatment(conn, sql);
+		ResultSet rs = ps.executeQuery();
+		ResultSetMetaData rsme = rs.getMetaData();
 
-			int columnCount = rsme.getColumnCount();
-			for (int i = 1; i <= columnCount; i++) {
-				
-				Map<String, String> field = new HashMap<String, String>();
+		int columnCount = rsme.getColumnCount();
+		for (int i = 1; i <= columnCount; i++) {
+			
+			Map<String, String> field = new HashMap<String, String>();
 
-				field.put("NAME", rsme.getColumnName(i)); // 字段名称
-				field.put("TYPE", rsme.getColumnTypeName(i)); //字段类型名称(例如：VACHAR2)
-				field.put("SIZE", Integer.toString(rsme.getPrecision(i))); //字段长度
-				field.put("NULLABLE", rsme.isNullable(i) == ResultSetMetaData.columnNullable ? "YES" : "NO"); //是否为空
-				field.put("REMARK", rsme.getColumnLabel(i)); //字段注释
-				
-				table.add(field);
-			}
-
-		} catch (Exception e) {
-			logger.error(String.format("getMetadataBySQL Exception: exception=%s", e.getMessage()));
+			field.put("NAME", rsme.getColumnName(i)); // 字段名称
+			field.put("TYPE", rsme.getColumnTypeName(i)); //字段类型名称(例如：VACHAR2)
+			field.put("SIZE", Integer.toString(rsme.getPrecision(i))); //字段长度
+			field.put("NULLABLE", rsme.isNullable(i) == ResultSetMetaData.columnNullable ? "YES" : "NO"); //是否为空
+			field.put("REMARK", rsme.getColumnLabel(i)); //字段注释
+			
+			table.add(field);
 		}
+
+
 		return table;
 	}
 	
@@ -67,8 +65,10 @@ public class SqlMetadata extends SqlStatement {
 	 * @param sql SQL语句
 	 * 
 	 * @return 列名
+	 * 
+	 * @throws SQLException 
 	 */
-	public String[] getColumnsBySql(Sql sql) {
+	public String[] getColumnsBySql(Sql sql) throws SQLException {
 		String columns[] = null;
 		
 		List<Map<String, String>> table = getMetadataBySql(sql);
@@ -92,31 +92,30 @@ public class SqlMetadata extends SqlStatement {
 	 * @param tableName 表名称
 	 * 
 	 * @return 元数据信息
+	 * 
+	 * @throws SQLException 
 	 */
-	public List<Map<String, String>> getMetadataByTable(String schema, String tableName) {
+	public List<Map<String, String>> getMetadataByTable(String schema, String tableName) throws SQLException {
 		
 		List<Map<String, String>> table = new ArrayList<Map<String, String>>();
+
+		DatabaseMetaData metadata = conn.getMetaData();
+		ResultSet rs = metadata.getColumns(null, schema, tableName, null);
 		
-		try {
-			DatabaseMetaData metadata = conn.getMetaData();
-			ResultSet rs = metadata.getColumns(null, schema, tableName, null);
+		while (rs.next()) {
 			
-			while (rs.next()) {
-				
-				Map<String, String> field = new HashMap<String, String>();
-				
-				field.put("NAME",  rs.getString("COLUMN_NAME"));// 字段名称
-				field.put("TYPE", rs.getString("TYPE_NAME")); //字段类型名称(例如：VACHAR2)
-				field.put("SIZE", Integer.toString(rs.getInt("COLUMN_SIZE"))); //字段长度
-				field.put("NULLABLE", rs.getString("IS_NULLABLE")); //是否为空
-				field.put("REMARK", rs.getString("REMARKS")); //字段注释
-				
-				table.add(field);
-				
-			}
-		} catch (Exception e) {
-			logger.error(String.format("getMetadataByTable Exception: exception=%s", e.getMessage()));
+			Map<String, String> field = new HashMap<String, String>();
+			
+			field.put("NAME",  rs.getString("COLUMN_NAME"));// 字段名称
+			field.put("TYPE", rs.getString("TYPE_NAME")); //字段类型名称(例如：VACHAR2)
+			field.put("SIZE", Integer.toString(rs.getInt("COLUMN_SIZE"))); //字段长度
+			field.put("NULLABLE", rs.getString("IS_NULLABLE")); //是否为空
+			field.put("REMARK", rs.getString("REMARKS")); //字段注释
+			
+			table.add(field);
+			
 		}
+
 		return table;
 	}
 	

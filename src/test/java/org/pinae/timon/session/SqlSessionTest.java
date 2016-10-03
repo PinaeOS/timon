@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +39,7 @@ public abstract class SqlSessionTest {
 		}
 	}
 	
-	public static void initData() {
+	public static void initData() throws SQLException {
 		try {
 			List<String> initSqlList = SqlSessionTest.builder.getScript("INIT_SCRIPT");
 			SqlSession session = sessionFactory.getSession();
@@ -87,7 +88,7 @@ public abstract class SqlSessionTest {
 	}
 	
 	@Test
-	public void testSelect() {
+	public void testSelect() throws SQLException {
 		List<Object[]> table = (List<Object[]>) session.select(builder.getSQLByName("GET_PERSON_1"));
 		assertEquals(table.size(), 3); // 用户数量测试
 		assertEquals(table.get(0)[0], 1); // 用户编号测试
@@ -95,7 +96,7 @@ public abstract class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testSelectForMap() {
+	public void testSelectForMap() throws SQLException {
 		List<Map<String, Object>> table = (List<Map<String, Object>>) session.select(builder.getSQLByName("GET_PERSON_1"), Map.class);
 		assertEquals(table.size(), 3); // 用户数量测试
 		assertEquals(table.get(0).get("id"), 1); // 用户编号测试
@@ -103,7 +104,7 @@ public abstract class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testSelectForObject() {
+	public void testSelectForObject() throws SQLException {
 		List<Person> table = (List<Person>) session.select(builder.getSQLByName("GET_PERSON_1"), Person.class);
 		assertEquals(table.size(), 3); // 用户数量测试
 		assertEquals(table.get(0).getId(), 1); // 用户编号测试
@@ -111,7 +112,7 @@ public abstract class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testSelectForAnnotation() {
+	public void testSelectForAnnotation() throws SQLException {
 		List<AnnotationPerson> table = (List<AnnotationPerson>) session.select(builder.getSQLByName("GET_PERSON_1"), AnnotationPerson.class);
 		assertEquals(table.size(), 3); // 用户数量测试
 		assertEquals(table.get(0).getUserId(), 1); // 用户编号测试
@@ -119,7 +120,7 @@ public abstract class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testSelectWithHandler() {
+	public void testSelectWithHandler() throws SQLException {
 		// 当数据返回数量为3条时, 在获取的列表中删除第一个元素(id=1)
 		ResultHandler handler = new ResultHandler() {
 			@SuppressWarnings("rawtypes")
@@ -139,7 +140,7 @@ public abstract class SqlSessionTest {
 	}
 	
 	@Test
-	public void testOne() {
+	public void testOne() throws SQLException {
 		Object[] row = session.one(builder.getSQLByName("GET_ID"));
 		assertEquals(row.length, 1);
 		assertEquals(row[0], 1); // 用户编号测试
@@ -147,13 +148,13 @@ public abstract class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testOneForMap() {
+	public void testOneForMap() throws SQLException {
 		Map<String, Object> firstRow = (Map<String, Object>)session.one(builder.getSQLByName("GET_ID"), Map.class);
 		assertEquals(firstRow.size(), 1);
 	}
 	
 	@Test
-	public void testOneForObject() {
+	public void testOneForObject() throws SQLException {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 1);
 		Person person = (Person)session.one(builder.getSQLByNameWithParameters("GET_PERSON_1", parameters), Person.class);
@@ -161,7 +162,7 @@ public abstract class SqlSessionTest {
 	}
 	
 	@Test
-	public void testOneForAnnotation() {
+	public void testOneForAnnotation() throws SQLException {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 1);
 		AnnotationPerson person = (AnnotationPerson)session.one(builder.getSQLByNameWithParameters("GET_PERSON_2", parameters), AnnotationPerson.class);
@@ -169,7 +170,7 @@ public abstract class SqlSessionTest {
 	}
 
 	@Test
-	public void testOneForAnnotationWithHandler() {
+	public void testOneForAnnotationWithHandler() throws SQLException {
 		ResultHandler handler = new ResultHandler() {
 			public <T> void handle(T t) {
 				if (t instanceof AnnotationPerson) {
@@ -186,14 +187,14 @@ public abstract class SqlSessionTest {
 	}
 	
 	@Test
-	public void testGetColumnsBySql() {
+	public void testGetColumnsBySql() throws SQLException {
 		String[] columns = session.getColumnsBySql(builder.getSQLByName("GET_PERSON_1"));
 		assertEquals(columns.length, 4);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testGetPrepareSql() {
+	public void testGetPrepareSql() throws SQLException {
 		Map<String, Object> parameters = new HashMap<String, Object>();
 		parameters.put("id", 1);
 		
@@ -205,7 +206,7 @@ public abstract class SqlSessionTest {
 	
 	@SuppressWarnings("unchecked")
 	// @Test
-	public void testCache() throws InterruptedException {
+	public void testCache() throws InterruptedException, SQLException {
 		/* 
 		 * 在获取的列表(3条数据)中删除第一个元素, 缓存的数据应为2条, 
 		 * 因此重新执行GET_USER_INFO_WITH_CACHE中的SQL, 即便没有加入ResultHandle, 
@@ -241,7 +242,7 @@ public abstract class SqlSessionTest {
 	}
 	
 	@After
-	public void close() {
+	public void close() throws SQLException {
 		logger.info("Destory Session:" + this.session.getConnection().toString());
 		this.session.close();
 	}
