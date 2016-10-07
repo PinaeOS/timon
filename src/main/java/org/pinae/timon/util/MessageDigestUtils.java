@@ -17,6 +17,14 @@ public class MessageDigestUtils {
 	public static String SHA1(String str) {
 		return encrypt(str, "SHA1");
 	}
+	
+	public static String SHA256(String str) {
+		return encrypt(str, "SHA256");
+	}
+	
+	public static String SHA512(String str) {
+		return encrypt(str, "SHA512");
+	}
 
 	public static String encrypt(String str, String enc) {
 		MessageDigest md = null;

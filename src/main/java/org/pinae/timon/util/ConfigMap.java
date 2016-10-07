@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -14,84 +15,125 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
- * 配置Map
+ * 配置信息Map
  * 
  * @author Huiyugeng
  *
+ * @param <K> Map键类型
+ * @param <V> Map值类型
  */
 public class ConfigMap<K, V> extends HashMap<K, V> {
 	
+	private static final long serialVersionUID = 7786845536669625320L;
+	
 	private Logger logger = Logger.getLogger(ConfigMap.class);
-	
-	private static final long serialVersionUID = -2541287416226597213L;
 
-	public String getString(String key, String defaultValue) {
-		V value = get(key);
-		if (value != null) {
-			return value.toString();
-		} else {
+	public ConfigMap() {
+
+	}
+
+	public ConfigMap(Map<? extends K, ? extends V> map) {
+		super(map);
+	}
+
+	public String getString(K key, String defaultValue) {
+		V v = get(key);
+		if (v == null) {
 			return defaultValue;
 		}
+		return v.toString();
+	}
+
+	public long getLong(K key, long defaultValue) {
+		V v = get(key);
+		if (v != null) {
+			try {
+				return Long.parseLong(v.toString());
+			} catch (NumberFormatException e) {
+				logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
+						v.toString(), defaultValue));
+			}
+		}
+		return defaultValue;
+	}
+
+	public int getInteger(K key, int defaultValue) {
+		V v = get(key);
+		if (v != null) {
+			try {
+				return Integer.parseInt(v.toString());
+			} catch (NumberFormatException e) {
+				logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
+						v.toString(), defaultValue));
+			}
+		}
+		return defaultValue;
+	}
+
+	public double getDouble(K key, double defaultValue) {
+		V v = get(key);
+		if (v != null) {
+			try {
+				return Double.parseDouble(v.toString());
+			} catch (NumberFormatException e) {
+				logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
+						v.toString(), defaultValue));
+			}
+		}
+		return defaultValue;
 	}
 	
-	public Integer getInteger(String key, int defaultValue) {
-		V value = get(key);
+	public Short getShort(K key, short defaultValue) {
+		V v = get(key);
 		try {
-			if (value != null && StringUtils.isNumeric(value.toString())) {
-				return Integer.parseInt(value.toString());
+			if (v != null && StringUtils.isNumeric(v.toString())) {
+				return Short.parseShort(v.toString());
 			} else {
 				return defaultValue;
 			}
 		} catch (Exception e) {
 			logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
-					value.toString(), defaultValue));
+					v.toString(), defaultValue));
 			return defaultValue;
 		}
 	}
-	
-	public Long getLong(String key, long defaultValue) {
-		V value = get(key);
-		try {
-			if (value != null && StringUtils.isNumeric(value.toString())) {
-				return Long.parseLong(value.toString());
-			} else {
-				return defaultValue;
-			}
-		} catch (Exception e) {
-			logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
-					value.toString(), defaultValue));
-			return defaultValue;
+
+	public boolean getBoolean(K key, boolean defaultValue) {
+		V v = get(key);
+		if (v != null) {
+			return Boolean.parseBoolean(v.toString().toLowerCase());
 		}
+		return defaultValue;
 	}
-	
-	public Short getShort(String key, short defaultValue) {
-		V value = get(key);
-		try {
-			if (value != null && StringUtils.isNumeric(value.toString())) {
-				return Short.parseShort(value.toString());
-			} else {
-				return defaultValue;
-			}
-		} catch (Exception e) {
-			logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
-					value.toString(), defaultValue));
-			return defaultValue;
+
+	public boolean isNotBlank(K key) {
+		V v = get(key);
+		if (v == null) {
+			return false;
 		}
+		return StringUtils.isNotBlank(v.toString());
 	}
-	
-	public Boolean getBoolean(String key, boolean defaultValue) {
-		V value = get(key);
-		try {
-			if (value != null && StringUtils.isNumeric(value.toString())) {
-				return Boolean.parseBoolean(value.toString());
-			} else {
-				return defaultValue;
-			}
-		} catch (Exception e) {
-			logger.error(String.format("parse exception: value=%s, defaultValue=%s", 
-					value.toString(), defaultValue));
-			return defaultValue;
+
+	public boolean equals(K key, V object) {
+		V v = get(key);
+		if (v == null && object == null) {
+			return true;
 		}
+		if (v != null && object != null) {
+			return v.equals(object);
+		}
+		return false;
+	}
+
+	public boolean equalsIgnoreCase(K key, V object) {
+		V v = get(key);
+		if (v == null && object == null) {
+			return true;
+		}
+		if (v != null && object != null) {
+			return v.toString().equalsIgnoreCase(object.toString());
+		}
+		return false;
 	}
 	
 	public static ConfigMap<String, String> load(String filename) throws IOException {
@@ -135,4 +177,5 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 		
 		return configMap;
 	}
+
 }

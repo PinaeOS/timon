@@ -13,7 +13,7 @@ import java.io.ObjectOutputStream;
  *
  */
 public class ObjectUtils {
-	
+
 	/**
 	 * 从字节数组转变为对象
 	 * 
@@ -31,7 +31,7 @@ public class ObjectUtils {
 		ObjectInputStream oi = new ObjectInputStream(bi);
 		return oi.readObject();
 	}
-	
+
 	/**
 	 * 从对象转变为字节数组
 	 * 
@@ -51,7 +51,7 @@ public class ObjectUtils {
 		byte[] data = bos.toByteArray();
 		return data;
 	}
-	
+
 	/**
 	 * 计算对象长度
 	 * 
@@ -59,20 +59,20 @@ public class ObjectUtils {
 	 * 
 	 * @return 对象长度 (byte)
 	 */
-    public static int size(Object obj){
-        if(obj==null) {
-            return 0;
-        }
-        ByteArrayOutputStream buf = new ByteArrayOutputStream(4096);
-        try{
-	        ObjectOutputStream out = new ObjectOutputStream(buf);
-	        out.writeObject(obj);
-	        out.flush();
-	        buf.close();
-        }catch(IOException e){
-        	return 0;
-        }
+	public static int size(Object obj) {
+		if (obj == null) {
+			return 0;
+		}
+		ByteArrayOutputStream buf = new ByteArrayOutputStream(4096);
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(buf);
+			out.writeObject(obj);
+			out.flush();
+			buf.close();
+		} catch (IOException e) {
+			return 0;
+		}
 
-        return buf.size();
-    }
+		return buf.size();
+	}
 }

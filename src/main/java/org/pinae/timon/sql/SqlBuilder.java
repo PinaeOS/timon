@@ -34,19 +34,12 @@ public class SqlBuilder {
 	
 	private String path;
 	
-	public SqlBuilder() throws IOException {
-		this.path = ClassLoaderUtils.getResourcePath("");
+	public SqlBuilder() {
 		
-		try {
-			SqlMapperReader reader = new SqlMapperReader(this.path, "sql.xml");
-			
-			this.sqlMap = reader.getSQLMap();
-			this.scriptMap = reader.getScriptMap();
-			this.envMap = reader.getEnvMap();
-			
-		} catch (IOException e) {
-			throw e;
-		}
+	}
+	
+	public SqlBuilder(String filename) throws IOException {
+		this(ClassLoaderUtils.getResourcePath(""), filename);
 	}
 	
 	public SqlBuilder(String path, String filename) throws IOException {
@@ -100,8 +93,7 @@ public class SqlBuilder {
 		
 		SqlObject sqlObj = this.sqlMap.get(name);
 		if (sqlObj != null) {
-			
-			
+
 			if (sqlObj.isPrepare() == false || 
 					this.envMap.containsKey("prepare") == false || 
 					"false".equalsIgnoreCase(this.envMap.get("prepare"))) {
@@ -447,5 +439,31 @@ public class SqlBuilder {
 		}
 		return null;
 	}
+	
+	/**
+	 * 构建SQL对象
+	 * 
+	 * @param query 原SQL语句
+	 * @param parameters 参数表
+	 * 
+	 * @return SQL对象
+	 */
+	public static Sql getSql(String query, Map<String, Object> parameters) {
+		SqlBuilder builder =new SqlBuilder();
+		String sql = builder.replaceVariables(query, parameters);
+		return new Sql(sql, parameters);
+	}
 
+	/**
+	 * 构建SQL对象
+	 * 
+	 * @param query 原SQL语句
+	 * @param parameters 参数表
+	 * 
+	 * @return SQL对象
+	 */
+	public static Sql getPreperSQL(String query, Map<String, Object> parameters) {
+		SqlBuilder builder =new SqlBuilder();
+		return builder.getPreperSQLWithParameters(query, parameters);
+	}
 }

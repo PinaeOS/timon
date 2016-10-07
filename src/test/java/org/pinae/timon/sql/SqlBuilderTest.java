@@ -21,7 +21,7 @@ public class SqlBuilderTest {
 	@Before
 	public void before() {
 		try {
-			this.builder = new SqlBuilder();
+			this.builder = new SqlBuilder("sql.xml");
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

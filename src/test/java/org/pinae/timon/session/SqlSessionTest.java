@@ -33,7 +33,7 @@ public abstract class SqlSessionTest {
 	
 	static {
 		try {
-			builder = new SqlBuilder();
+			builder = new SqlBuilder("sql.xml");
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}
