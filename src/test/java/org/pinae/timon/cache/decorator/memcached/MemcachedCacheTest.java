@@ -20,7 +20,7 @@ public class MemcachedCacheTest extends KVCacheTestCase {
 
 	private Cache cache;
 	
-	private String memcachedServer = "192.168.228.132:11211";
+	private String memcachedServer = "127.0.0.1:11211";
 	
 	public void createCache(int size) throws CacheException {
 		MemcachedCacheConfiguration config = new MemcachedCacheConfiguration();

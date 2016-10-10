@@ -38,24 +38,24 @@ public class SqlBuilder {
 		
 	}
 	
+	public SqlBuilder(File file) throws IOException {
+		this(new SqlMapperReader(file));
+		this.path = file.getAbsolutePath();
+	}
+	
 	public SqlBuilder(String filename) throws IOException {
 		this(ClassLoaderUtils.getResourcePath(""), filename);
 	}
 	
 	public SqlBuilder(String path, String filename) throws IOException {
-		
+		this(new SqlMapperReader(path, filename));
 		this.path = path;
-		
-		try {
-			SqlMapperReader reader = new SqlMapperReader(this.path, filename);
-			
-			this.sqlMap = reader.getSQLMap();
-			this.scriptMap = reader.getScriptMap();
-			this.envMap = reader.getEnvMap();
-			
-		} catch (IOException e) {
-			throw e;
-		}	
+	}
+	
+	private SqlBuilder(SqlMapperReader reader) {
+		this.sqlMap = reader.getSQLMap();
+		this.scriptMap = reader.getScriptMap();
+		this.envMap = reader.getEnvMap();
 	}
 	
 	public SqlBuilder(Map<String, SqlObject> sqlMap, Map<String, String> scriptMap, Map<String, String> envMap) {

@@ -1,5 +1,6 @@
 package org.pinae.timon.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -16,8 +17,8 @@ import org.pinae.nala.xb.util.ResourceReader;
 import org.pinae.timon.io.SqlMapper.Env;
 import org.pinae.timon.io.SqlMapper.GlobalVar;
 import org.pinae.timon.io.SqlMapper.Import;
-import org.pinae.timon.io.SqlMapper.SqlObject;
 import org.pinae.timon.io.SqlMapper.Script;
+import org.pinae.timon.io.SqlMapper.SqlObject;
 
 /**
  * 从配置文件中读取SQL配置
@@ -30,6 +31,10 @@ public class SqlMapperReader {
 	private Map<String, SqlObject> sqlMap = new HashMap<String, SqlObject>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
 	private Map<String, String> envMap = new HashMap<String, String>();
+	
+	public SqlMapperReader(File file) throws IOException {
+		read(file, null);
+	}
 	
 	public SqlMapperReader(String path, String filename) throws IOException {
 		read(path, filename, null);
@@ -61,9 +66,27 @@ public class SqlMapperReader {
 	public Map<String, String> getEnvMap() {
 		return this.envMap;
 	}
-
-
+	
 	private void read(String path, String filename, Map<String, String> globalVar) throws IOException {
+		try {
+			InputStreamReader stream = new ResourceReader().getFileStream(path + filename);
+			read(path, stream, globalVar);
+		} catch (NoSuchPathException e) {
+			throw new IOException(e);
+		}
+	}
+	
+	private void read(File file, Map<String, String> globalVar) throws IOException {
+		try {
+			InputStreamReader stream = new ResourceReader().getFileStream(file);
+			read(file.getAbsolutePath(), stream, globalVar);
+		} catch (NoSuchPathException e) {
+			throw new IOException(e);
+		}
+	}
+
+
+	private void read(String path, InputStreamReader stream, Map<String, String> globalVar) throws IOException {
 		
 		Map<String, String> subGlobalVar = new HashMap<String, String>();
 		if (globalVar != null) {
@@ -74,13 +97,10 @@ public class SqlMapperReader {
 
 		Unmarshaller bind = null;
 		try {
-			InputStreamReader stream = new ResourceReader().getFileStream(path + filename);
 			bind = new XmlUnmarshaller(stream);
 
 			bind.setRootClass(SqlMapper.class);
 			mapper = (SqlMapper) bind.unmarshal();
-		} catch (NoSuchPathException e) {
-			throw new IOException(e);
 		} catch (UnmarshalException e) {
 			throw new IOException(e);
 		}
