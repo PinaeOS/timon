@@ -1,0 +1,93 @@
+{
+    "namespaces": "org.timon.test.builder", 
+    "global": [
+        {
+            "value": "person", 
+            "key": "table"
+        }
+    ], 
+    "sql": [
+        {
+        	"name": "GET_ID",
+            "prepare": false, 
+            "value": "select id from :table"
+        }, 
+        {
+        	"name": "GET_PERSON_1", 
+            "prepare": false, 
+            "choose": [
+                {
+                    "value": "and id = :id", 
+                    "when": "id"
+                }
+            ], 
+            "value": "select * from :table where 1=1"
+        }, 
+        {
+        	"name": "GET_PERSON_2", 
+            "prepare": false, 
+            "choose": [
+                {
+                    "block": "id", 
+                    "value": "and id = :id", 
+                    "when": "id"
+                }, 
+                {
+                    "value": "and name = :name", 
+                    "when": "name"
+                }, 
+                {
+                    "block": "order", 
+                    "value": "order by id", 
+                    "when": "id"
+                }
+            ], 
+            "value": "select * from :table where 1=1 {name} {id} {order}"
+        }, 
+        {
+        	"name": "SUB_SQL1", 
+            "prepare": false, 
+            "choose": [
+                {
+                    "value": "where id = :id", 
+                    "when": "id"
+                }
+            ], 
+            "value": "select name from USER1"
+        }, 
+        {
+        	"name": "SUB_SQL2", 
+            "prepare": false, 
+            "choose": [
+                {
+                    "block": "order", 
+                    "value": "order by id", 
+                    "when": "id"
+                }
+            ], 
+            "value": "select name from USER2 {order}"
+        }, 
+        {
+        	"name": "SUB_SQL3", 
+            "prepare": false, 
+            "value": "select name from (${org.timon.test.builder.SUB_SQL1}) t1 union select name from (${org.timon.test.builder.SUB_SQL2}) t2"
+        }, 
+        {
+        	"name": "SQL_REF_TEST", 
+            "prepare": false, 
+            "choose": [
+                {
+                    "block": "order", 
+                    "value": "order by id", 
+                    "when": "id"
+                }
+            ], 
+            "value": "select name from (${org.timon.test.builder.SUB_SQL3}) t {order}"
+        }, 
+        {
+        	"name": "INSERT_PERSON", 
+            "prepare": false, 
+            "value": "insert into :table(id, name, age, phone) values (:id, :name, :age, :phone)"
+        }
+    ]
+}

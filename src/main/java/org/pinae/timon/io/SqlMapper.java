@@ -20,19 +20,19 @@ public class SqlMapper {
 	private String namespaces;
 	
 	@Element(name = "env")
-	private List<Env> envList = new ArrayList<Env>();
+	private List<Env> env = new ArrayList<Env>();
 	
-	@Element(name = "import")
-	private List<Import> importList = new ArrayList<Import>();
+	@Element(name = "imports")
+	private List<Import> imports = new ArrayList<Import>();
 	
 	@Element(name = "script")
-	private List<Script> scriptList = new ArrayList<Script>();
+	private List<Script> script = new ArrayList<Script>();
 
 	@Element(name = "global")
-	private List<GlobalVar> globalVarList = new ArrayList<GlobalVar>();
+	private List<GlobalVar> global = new ArrayList<GlobalVar>();
 
 	@Element(name = "sql")
-	private List<SqlObject> sqlList = new ArrayList<SqlObject>();
+	private List<SqlObject> sql = new ArrayList<SqlObject>();
 	
 	public String getNamespaces() {
 		return namespaces;
@@ -42,44 +42,44 @@ public class SqlMapper {
 		this.namespaces = namespace;
 	}
 
-	public List<Env> getEnvList() {
-		return envList;
+	public List<Env> getEnv() {
+		return env;
 	}
 
-	public void setEnvList(List<Env> envList) {
-		this.envList = envList;
+	public void setEnv(List<Env> envList) {
+		this.env = envList;
 	}
 
-	public List<SqlObject> getSqlList() {
-		return sqlList;
+	public List<SqlObject> getSql() {
+		return sql;
 	}
 
 	public void addSql(SqlObject sql) {
-		this.sqlList.add(sql);
+		this.sql.add(sql);
 	}
 
-	public List<Import> getImportList() {
-		return importList;
+	public List<Import> getImports() {
+		return imports;
 	}
 
 	public void addImport(Import sqlImport) {
-		this.importList.add(sqlImport);
+		this.imports.add(sqlImport);
 	}
 
-	public List<GlobalVar> getGlobalVarList() {
-		return globalVarList;
+	public List<GlobalVar> getGlobal() {
+		return global;
 	}
 
 	public void addGlobalVar(GlobalVar global) {
-		this.globalVarList.add(global);
+		this.global.add(global);
 	}
 
-	public List<Script> getScriptList() {
-		return scriptList;
+	public List<Script> getScript() {
+		return script;
 	}
 
 	public void addScript(Script script) {
-		this.scriptList.add(script);
+		this.script.add(script);
 	}
 	
 	public class Env {
@@ -180,7 +180,7 @@ public class SqlMapper {
 		private boolean prepare; // 是否使用预编译SQL
 
 		@Element(name = "choose")
-		private List<Choose> chooseList = new ArrayList<Choose>(); // 选择条件
+		private List<Choose> choose = new ArrayList<Choose>(); // 选择条件
 
 		@ElementValue
 		private String value; // SQL语句
@@ -201,12 +201,12 @@ public class SqlMapper {
 			this.prepare = prepare;
 		}
 
-		public List<Choose> getChooseList() {
-			return chooseList;
+		public List<Choose> getChoose() {
+			return choose;
 		}
 
 		public void setChooseList(Choose choose) {
-			this.chooseList.add(choose);
+			this.choose.add(choose);
 		}
 
 		public String getValue() {

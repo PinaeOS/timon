@@ -4,10 +4,10 @@
 
 	<env key="prepare" value="true" />
 	
-	<import file="sql/sql_parse_test.xml"/>
-	<import file="sql/sql_format_test.xml"/>
-	<import file="sql/sql_cache_test.xml"/>
-	<import file="sql/sql_builder_test.xml"/>
+	<imports file="sql/xml/sql_parse_test.xml"/>
+	<imports file="sql/xml/sql_format_test.xml"/>
+	<imports file="sql/xml/sql_cache_test.xml"/>
+	<imports file="sql/json/sql_builder_test.json"/>
 	
 	<script name="TEST_SCRIPT" file="test.sql" />
 	<script name="INIT_SCRIPT" file="init.sql" />

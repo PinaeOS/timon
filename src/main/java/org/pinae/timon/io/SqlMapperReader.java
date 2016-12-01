@@ -20,6 +20,8 @@ import org.pinae.timon.io.SqlMapper.Import;
 import org.pinae.timon.io.SqlMapper.Script;
 import org.pinae.timon.io.SqlMapper.SqlObject;
 
+import com.alibaba.fastjson.JSON;
+
 /**
  * 从配置文件中读取SQL配置
  * 
@@ -27,19 +29,23 @@ import org.pinae.timon.io.SqlMapper.SqlObject;
  *
  */
 public class SqlMapperReader {
-	
+
 	private Map<String, SqlObject> sqlMap = new HashMap<String, SqlObject>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
 	private Map<String, String> envMap = new HashMap<String, String>();
-	
+
 	public SqlMapperReader(File file) throws IOException {
-		read(file, null);
+		if (file != null) {
+			loadMapper(file.getAbsolutePath(), file.getName(), null);
+		}
 	}
-	
+
 	public SqlMapperReader(String path, String filename) throws IOException {
-		read(path, filename, null);
+		if (filename != null) {
+			loadMapper(path, filename, null);
+		}
 	}
-	
+
 	/**
 	 * 获取SQL列表
 	 * 
@@ -48,7 +54,7 @@ public class SqlMapperReader {
 	public Map<String, SqlObject> getSQLMap() {
 		return this.sqlMap;
 	}
-	
+
 	/**
 	 * 获取脚本文件列表
 	 * 
@@ -57,7 +63,7 @@ public class SqlMapperReader {
 	public Map<String, String> getScriptMap() {
 		return this.scriptMap;
 	}
-	
+
 	/**
 	 * 获取环境变量键值集合
 	 * 
@@ -67,31 +73,26 @@ public class SqlMapperReader {
 		return this.envMap;
 	}
 	
-	private void read(String path, String filename, Map<String, String> globalVar) throws IOException {
+	private void loadMapper(String path, String filename, Map<String, String> globalVar) throws IOException {
 		try {
-			InputStreamReader stream = new ResourceReader().getFileStream(path + filename);
-			read(path, stream, globalVar);
-		} catch (NoSuchPathException e) {
-			throw new IOException(e);
-		}
-	}
-	
-	private void read(File file, Map<String, String> globalVar) throws IOException {
-		try {
-			InputStreamReader stream = new ResourceReader().getFileStream(file);
-			read(file.getAbsolutePath(), stream, globalVar);
+			
+			if (filename.endsWith("xml")) {
+				InputStreamReader stream = new ResourceReader().getFileStream(path + File.separator + filename);
+				loadMapperFromXml(path, stream, null);
+			} else if (filename.endsWith("json")) {
+				StringBuffer text = new ResourceReader().readFile(path + File.separator + filename);
+				if (text != null) {
+					loadMapperFromJson(path, text.toString(), null);
+				} else {
+					throw new IOException(filename + " is blank file");
+				}
+			}
 		} catch (NoSuchPathException e) {
 			throw new IOException(e);
 		}
 	}
 
-
-	private void read(String path, InputStreamReader stream, Map<String, String> globalVar) throws IOException {
-		
-		Map<String, String> subGlobalVar = new HashMap<String, String>();
-		if (globalVar != null) {
-			subGlobalVar.putAll(globalVar);
-		}
+	private void loadMapperFromXml(String path, InputStreamReader stream, Map<String, String> globalVar) throws IOException {
 
 		SqlMapper mapper = new SqlMapper();
 
@@ -101,31 +102,49 @@ public class SqlMapperReader {
 
 			bind.setRootClass(SqlMapper.class);
 			mapper = (SqlMapper) bind.unmarshal();
+			build(path, mapper, globalVar);
 		} catch (UnmarshalException e) {
 			throw new IOException(e);
 		}
-		
+	}
+	
+	private void loadMapperFromJson(String path, String jsonText, Map<String, String> globalVar) throws IOException {
+		SqlMapper mapper = new SqlMapper();
+		try {
+			String json = JSON.toJSON(mapper).toString();
+			mapper = JSON.parseObject(json, SqlMapper.class);
+			build(path, mapper, globalVar);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+	}
+
+	private void build(String path, SqlMapper mapper, Map<String, String> globalVar) throws IOException {
+		Map<String, String> subGlobalVar = new HashMap<String, String>();
+		if (globalVar != null) {
+			subGlobalVar.putAll(globalVar);
+		}
 		// 载入命名空间
 		String namespace = mapper.getNamespaces();
 
 		// 载入全局变量
-		List<GlobalVar> globals = mapper.getGlobalVarList();
+		List<GlobalVar> globals = mapper.getGlobal();
 		for (GlobalVar global : globals) {
 			subGlobalVar.put(global.getKey(), global.getValue());
 		}
 
 		Set<String> keySet = subGlobalVar.keySet();
 
-		List<SqlObject> sqlObjList = mapper.getSqlList();
+		List<SqlObject> sqlObjList = mapper.getSql();
 		for (SqlObject sqlObj : sqlObjList) {
-			String sqlName =sqlObj.getName();
+			String sqlName = sqlObj.getName();
 			String query = sqlObj.getValue();
-			
+
 			if (StringUtils.isBlank(sqlName)) {
 				continue;
 			}
-			
-			if (query != null) { 
+
+			if (query != null) {
 				for (String key : keySet) {
 					// 全局变量替换
 					if (StringUtils.isNotBlank(key)) {
@@ -138,38 +157,40 @@ public class SqlMapperReader {
 				}
 				sqlObj.setValue(query);
 			}
-			
-			//使用命名空间构建SQL名称
+
+			// 使用命名空间构建SQL名称
 			if (StringUtils.isNotBlank(namespace)) {
 				sqlName = namespace.trim() + "." + sqlName;
 			}
-			
+
 			sqlObj.setValue(query);
 			this.sqlMap.put(sqlName, sqlObj);
-		
+
 		}
-		
+
 		// 读取SQL脚本文件列表
-		List<Script> scriptList = mapper.getScriptList();
+		List<Script> scriptList = mapper.getScript();
 		for (Script script : scriptList) {
 			String scriptName = script.getName();
 			String scriptFile = script.getFile();
-			
+
 			if (StringUtils.isNotBlank(scriptName) && StringUtils.isNotBlank(scriptFile)) {
 				this.scriptMap.put(scriptName, scriptFile);
 			}
 		}
 
 		// 载入引入SQL文件
-		List<Import> importFileList = mapper.getImportList();
+		List<Import> importFileList = mapper.getImports();
 		for (Import importFile : importFileList) {
-			read(path, importFile.getFile(), subGlobalVar);
+			loadMapper(path, importFile.getFile(), subGlobalVar);
 		}
-		
+
 		// 载入环境变量
-		List<Env> envList = mapper.getEnvList();
+		List<Env> envList = mapper.getEnv();
 		for (Env env : envList) {
 			this.envMap.put(env.getKey(), env.getValue());
 		}
+
 	}
+
 }

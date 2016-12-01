@@ -244,7 +244,7 @@ public class SqlBuilder {
 
 				try {
 					// 执行子句构建 子句格式为{statement}
-					List<Choose> chooseList = sqlObj.getChooseList();
+					List<Choose> chooseList = sqlObj.getChoose();
 
 					if (chooseList != null && parameters != null) {
 						for (Choose choose : chooseList) {
