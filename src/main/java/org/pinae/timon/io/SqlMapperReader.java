@@ -78,7 +78,7 @@ public class SqlMapperReader {
 			
 			if (filename.endsWith("xml")) {
 				InputStreamReader stream = new ResourceReader().getFileStream(path + File.separator + filename);
-				loadMapperFromXml(path, stream, null);
+				loadMapperFromXml(path, stream, globalVar);
 			} else if (filename.endsWith("json")) {
 				StringBuffer text = new ResourceReader().readFile(path + File.separator + filename);
 				if (text != null) {
@@ -111,8 +111,7 @@ public class SqlMapperReader {
 	private void loadMapperFromJson(String path, String jsonText, Map<String, String> globalVar) throws IOException {
 		SqlMapper mapper = new SqlMapper();
 		try {
-			String json = JSON.toJSON(mapper).toString();
-			mapper = JSON.parseObject(json, SqlMapper.class);
+			mapper = JSON.parseObject(jsonText, SqlMapper.class);
 			build(path, mapper, globalVar);
 		} catch (Exception e) {
 			throw new IOException(e);
