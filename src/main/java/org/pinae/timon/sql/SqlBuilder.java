@@ -13,10 +13,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.pinae.timon.io.SqlMapper.ProcedureObject;
+import org.pinae.timon.io.SqlMapper.ProcedureObject.Out;
 import org.pinae.timon.io.SqlMapper.SqlObject;
 import org.pinae.timon.io.SqlMapper.SqlObject.Choose;
-import org.pinae.timon.io.SqlScriptReader;
 import org.pinae.timon.io.SqlMapperReader;
+import org.pinae.timon.io.SqlScriptReader;
 import org.pinae.timon.util.ClassLoaderUtils;
 
 /**
@@ -31,33 +33,33 @@ public class SqlBuilder {
 	private Map<String, SqlObject> sqlMap = new HashMap<String, SqlObject>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
 	private Map<String, String> envMap = new HashMap<String, String>();
-	
+
 	private String path;
-	
+
 	public SqlBuilder() {
-		
+
 	}
-	
+
 	public SqlBuilder(File file) throws IOException {
 		this(new SqlMapperReader(file));
 		this.path = file.getAbsolutePath();
 	}
-	
+
 	public SqlBuilder(String filename) throws IOException {
 		this(ClassLoaderUtils.getResourcePath(""), filename);
 	}
-	
+
 	public SqlBuilder(String path, String filename) throws IOException {
 		this(new SqlMapperReader(path, filename));
 		this.path = path;
 	}
-	
+
 	private SqlBuilder(SqlMapperReader reader) {
 		this.sqlMap = reader.getSQLMap();
 		this.scriptMap = reader.getScriptMap();
 		this.envMap = reader.getEnvMap();
 	}
-	
+
 	public SqlBuilder(Map<String, SqlObject> sqlMap, Map<String, String> scriptMap, Map<String, String> envMap) {
 		this.sqlMap = sqlMap;
 		this.scriptMap = scriptMap;
@@ -88,26 +90,31 @@ public class SqlBuilder {
 		if (name == null) {
 			return null;
 		}
-		
+
 		Map<String, Object> parameterMap = buildParameters(parameters);
-		
+
 		SqlObject sqlObj = this.sqlMap.get(name);
 		if (sqlObj != null) {
 
-			if (sqlObj.isPrepare() == false || 
-					this.envMap.containsKey("prepare") == false || 
-					"false".equalsIgnoreCase(this.envMap.get("prepare"))) {
+			if (sqlObj.isPrepare() == false || this.envMap.containsKey("prepare") == false || "false".equalsIgnoreCase(this.envMap.get("prepare"))) {
 				String sql = replaceSQL(sqlObj, parameterMap);
 				return new Sql(sql, parameterMap);
 			} else {
 				String sql = replaceChoose(sqlObj, parameterMap);
+				if (sqlObj instanceof ProcedureObject) {
+					ProcedureObject procedureObj = (ProcedureObject)sqlObj;
+					List<Out> outList = procedureObj.getOut();
+					for (Out out : outList) {
+						parameterMap.put(out.getName(), out);
+					}
+				}
 				return getPreperSQLWithParameters(sql, parameterMap);
 			}
 		} else {
 			return null;
 		}
 	}
-	
+
 	/*
 	 * 构建预编译SQL所需要的SQL和变量
 	 * 
@@ -117,7 +124,7 @@ public class SqlBuilder {
 		// 检索query语句中所有:key的标记
 		Pattern pattern = Pattern.compile(":\\w+");
 		Matcher matcher = pattern.matcher(query);
-		
+
 		// 构建<key, index>值对
 		int index = 1;
 		Map<String, Integer> keyIndexs = new HashMap<String, Integer>();
@@ -127,30 +134,30 @@ public class SqlBuilder {
 				keyIndexs.put(word.substring(1), index++);
 			}
 		}
-		
+
 		// 构建<index, value>值对
 		Map<Integer, Object> prepareValue = new HashMap<Integer, Object>();
 		Set<String> paramKeySet = parameters.keySet();
 		for (String paramKey : paramKeySet) {
 			Integer preIndex = keyIndexs.get(paramKey);
 			Object preValue = parameters.get(paramKey);
-			
+
 			prepareValue.put(preIndex, preValue);
 		}
-		
-		//替换所有的变量为"?"
+
+		// 替换所有的变量为"?"
 		query = matcher.replaceAll("?");
-		
+
 		Sql sql = new Sql(query, parameters);
 		sql.setPreperStatement(true);
 		sql.setKeyIndexs(keyIndexs);
 		sql.setPreperValues(prepareValue);
-		
+
 		return sql;
 	}
-	
+
 	/*
-	 * 构建SQL语句参数表 
+	 * 构建SQL语句参数表
 	 * 
 	 * @param parameters 参数对象
 	 * 
@@ -159,7 +166,7 @@ public class SqlBuilder {
 	@SuppressWarnings("unchecked")
 	private Map<String, Object> buildParameters(Object parameters) {
 		Map<String, Object> parameterMap = new HashMap<String, Object>();
-		
+
 		if (parameters != null) {
 			if (parameters.getClass().isArray()) {
 				Object[] paramValues = (Object[]) parameters;
@@ -176,7 +183,7 @@ public class SqlBuilder {
 				Field[] fields = paramClass.getDeclaredFields();
 				for (Field field : fields) {
 					field.setAccessible(true);
-	
+
 					String fieldName = field.getName();
 					Object fieldValue = null;
 					try {
@@ -187,44 +194,45 @@ public class SqlBuilder {
 					if (fieldName != null && fieldValue != null) {
 						parameterMap.put(fieldName, fieldValue);
 					}
-			  	}
+				}
 			}
 		}
-		
+
 		return parameterMap;
 	}
-	
+
 	/*
 	 * 替引用的SQL
 	 * 
 	 * @param sql 需要构建的SQL对象
+	 * 
 	 * @param subSQLs 引用的其他SQL语句
 	 * 
 	 * @return 构建后的SQL语句
 	 */
 	private String replaceSQL(SqlObject sqlObj, Map<String, Object> subSQLs) {
 		String query = sqlObj.getValue();
-		
+
 		if (query != null) {
-			String regexs = "[$][{](\\S*)[}]"; //子句替换模式
+			String regexs = "[$][{](\\S*)[}]"; // 子句替换模式
 			Pattern regex = Pattern.compile(regexs);
 			Matcher regexMatcher = regex.matcher(query);
 			while (regexMatcher.find()) {
 				String subSQLName = regexMatcher.group(1);
-				
+
 				SqlObject subSQL = this.sqlMap.get(subSQLName);
 				if (subSQL != null) {
 					String subSQLContent = replaceSQL(subSQL, subSQLs);
-					
+
 					query = query.replace(regexMatcher.group(0), subSQLContent);
 					sqlObj.setValue(query);
 				}
 			}
-			
+
 			query = replaceChoose(sqlObj, subSQLs);
 			query = replaceVariables(query, subSQLs);
 		}
-		
+
 		return query;
 	}
 
@@ -232,6 +240,7 @@ public class SqlBuilder {
 	 * 替换SQL语句中的条件
 	 * 
 	 * @param sql 需要构建的SQL对象
+	 * 
 	 * @param parameters 参数表
 	 * 
 	 * @return 构建后的SQL语句
@@ -266,17 +275,17 @@ public class SqlBuilder {
 							}
 						}
 					}
-					
-					//清理没有被替换的子句
-					String regexs = "[{](\\w*)[}]"; //子句替换模式
+
+					// 清理没有被替换的子句
+					String regexs = "[{](\\w*)[}]"; // 子句替换模式
 					Pattern regex = Pattern.compile(regexs);
 					Matcher regexMatcher = regex.matcher(query);
 					while (regexMatcher.find()) {
 						query = query.replace(regexMatcher.group(0), "");
 					}
-					
+
 				} catch (Exception e) {
-					
+
 				}
 			}
 		}
@@ -288,6 +297,7 @@ public class SqlBuilder {
 	 * 替换SQL语句的变量
 	 * 
 	 * @param sql SQL语句
+	 * 
 	 * @param parameters 参数表
 	 * 
 	 * @return 构建后的SQL语句
@@ -318,8 +328,7 @@ public class SqlBuilder {
 						} else if (value == null) {
 							continue;
 						} else if (value instanceof Date) {
-							value = String.format("'%s'",
-									new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date) value));
+							value = String.format("'%s'", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date) value));
 						} else {
 							value = value.toString();
 						}
@@ -351,7 +360,7 @@ public class SqlBuilder {
 	public List<String> getScript(String name) {
 		return getScript(name, "UTF8");
 	}
-	
+
 	/**
 	 * 获得SQL脚本中SQL语句列表
 	 * 
@@ -363,10 +372,10 @@ public class SqlBuilder {
 	public List<String> getScript(String name, String encoding) {
 		String filename = this.scriptMap.get(name);
 		List<String> sqlList = new SqlScriptReader().getSQLList(this.path + File.separator + filename, encoding);
-		
+
 		return sqlList;
 	}
-	
+
 	/**
 	 * 限制查询条数的SQL
 	 * 
@@ -398,8 +407,7 @@ public class SqlBuilder {
 				}
 				pagingSelect.append(query);
 				if (offset > 0) {
-					pagingSelect.append(String.format(" ) row_ where rownum <= %d) where rownum_ > %d",
-							length + offset, offset));
+					pagingSelect.append(String.format(" ) row_ where rownum <= %d) where rownum_ > %d", length + offset, offset));
 				} else {
 					pagingSelect.append(String.format(" ) where rownum <= %d", length));
 				}
@@ -439,7 +447,7 @@ public class SqlBuilder {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 构建SQL对象
 	 * 
@@ -449,7 +457,7 @@ public class SqlBuilder {
 	 * @return SQL对象
 	 */
 	public static Sql getSql(String query, Map<String, Object> parameters) {
-		SqlBuilder builder =new SqlBuilder();
+		SqlBuilder builder = new SqlBuilder();
 		String sql = builder.replaceVariables(query, parameters);
 		return new Sql(sql, parameters);
 	}
@@ -463,7 +471,7 @@ public class SqlBuilder {
 	 * @return SQL对象
 	 */
 	public static Sql getPreperSQL(String query, Map<String, Object> parameters) {
-		SqlBuilder builder =new SqlBuilder();
+		SqlBuilder builder = new SqlBuilder();
 		return builder.getPreperSQLWithParameters(query, parameters);
 	}
 }

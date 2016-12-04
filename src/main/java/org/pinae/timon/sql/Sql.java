@@ -30,6 +30,9 @@ public class Sql {
 	/* 是否Select语句 */
 	private boolean select = false;
 	
+	/* 是否存储过程 */
+	private boolean procedure = false;
+	
 	/* 传入的参数集 */
 	private Map<String, Object> parameters;
 	
@@ -88,7 +91,12 @@ public class Sql {
 			this.sql = sql.trim();
 			this.comment = parseComment(sql);
 			this.digest = MessageDigestUtils.MD5(sql);
-			this.select = this.sql.toLowerCase().startsWith("select");
+			
+			String sqlStatement = this.sql.toLowerCase();
+			if (sqlStatement != null) {
+				this.select = sqlStatement.startsWith("select");
+				this.procedure = sqlStatement.startsWith("call");
+			}
 		}
 	}
 	
@@ -228,7 +236,8 @@ public class Sql {
 	 * @return 是否验证通过
 	 */
 	public boolean validate() {
-		return this.sql != null;
+		boolean validate = this.sql != null;
+		return validate;
 	}
 	
 	/**
@@ -240,6 +249,16 @@ public class Sql {
 		return select;
 	}
 	
+	
+	/**
+	 * Sql对象中的Sql语句是否存储过程
+	 * 
+	 * @return 是否存储过程
+	 */
+	public boolean isProcedure() {
+		return procedure;
+	}
+
 	/*
 	 * 解析Sql语句中的注释信息
 	 */

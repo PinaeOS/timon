@@ -5,7 +5,13 @@
 		call set_user(:id, :name) 
 	</procedure>
 	
+	<procedure name="COUNT_USER">
+		call get_user(:name, :count)
+		<out name="count" type="int"></out>
+	</procedure>
+	
 	<procedure name="GET_USER">
-		call get_user(:name) 
+		call get_user(:name, :result)
+		<out name="result" type="cursor"></out>
 	</procedure>
 </mapper>

@@ -296,7 +296,11 @@ public class DefaultSqlSession implements SqlSession {
 		}
 		return this.executor.execute(sqls, batchSize);
 	}
-
+	
+	public Object[] call(Sql sql) throws SQLException {
+		return this.executor.call(sql);
+	}
+	
 	public void commit() throws SQLException {
 		this.executor.commit();
 	}
@@ -352,6 +356,8 @@ public class DefaultSqlSession implements SqlSession {
 			}
 		}
 	}
+
+
 
 
 }

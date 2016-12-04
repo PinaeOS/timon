@@ -55,6 +55,8 @@ public interface SqlSession {
 	
 	public int[] execute(Iterable<String> sqls, int batchSize) throws SQLException;
 	
+	public Object[] call(Sql sql) throws SQLException;
+	
 	public void commit() throws SQLException;
 
 	public void rollback() throws SQLException;

@@ -1,5 +1,6 @@
 package org.pinae.timon.session.executor;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -54,8 +55,6 @@ public class SqlExecutor extends SqlStatement {
 		List<Object[]> dataList = null;
 		
 		if (sql.isSelect()) {
-
-			dataList = new ArrayList<Object[]>();
 			
 			ResultSet rs = null;
 			PreparedStatement stmt = null;
@@ -64,16 +63,7 @@ public class SqlExecutor extends SqlStatement {
 				stmt = this.createStatment(conn, sql);
 				rs = stmt.executeQuery();
 				
-				ResultSetMetaData rsmd = rs.getMetaData();
-
-				int columnCount = rsmd.getColumnCount();
-				while (rs.next()) {
-					Object[] row = new Object[columnCount];
-					for (int i = 0; i < columnCount; i++) {
-						row[i] = rs.getObject(i + 1);
-					}
-					dataList.add(row);
-				}
+				dataList = getResultSet(rs);
 
 			} catch (SQLException e) {
 				throw e;
@@ -135,6 +125,50 @@ public class SqlExecutor extends SqlStatement {
 		
 		logger.debug(String.format("Execute %s used %d ms", sql.getSql(), System.currentTimeMillis() - start));
 
+		return result;
+	}
+	
+	/**
+	 * 执行存储过程
+	 * 
+	 * @param sql 需要执行的存储过程
+	 * 
+	 * @return 存储过程执行结果
+	 * 
+	 * @throws SQLException
+	 */
+	public Object[] call(Sql sql) throws SQLException {
+		
+		long start =  System.currentTimeMillis();
+		
+		if (sql.validate() == false) {
+			return null;
+		}
+		
+		Object[] result = null;
+		
+		Statement stmt = null;
+		try {
+			stmt = this.createStatment(conn, sql);
+			if (stmt instanceof CallableStatement) {
+				CallableStatement callStmt = (CallableStatement)stmt;
+				callStmt.execute(sql.getSql());
+				result = this.getProcedureOutValue(callStmt, sql);
+			}
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			try {
+				if (stmt != null && stmt.isClosed() == false) {
+					stmt.close();
+				}
+			} catch (SQLException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+		
+		logger.debug(String.format("Execute %s used %d ms", sql.getSql(), System.currentTimeMillis() - start));
+		
 		return result;
 	}
 	
@@ -234,4 +268,22 @@ public class SqlExecutor extends SqlStatement {
 		return true;
 	}
 
+	
+	private List<Object[]> getResultSet(ResultSet rs) throws SQLException {
+		
+		List<Object[]> dataList = new ArrayList<Object[]>();;
+		
+		ResultSetMetaData rsmd = rs.getMetaData();
+
+		int columnCount = rsmd.getColumnCount();
+		while (rs.next()) {
+			Object[] row = new Object[columnCount];
+			for (int i = 0; i < columnCount; i++) {
+				row[i] = rs.getObject(i + 1);
+			}
+			dataList.add(row);
+		}
+		
+		return dataList;
+	}
 }

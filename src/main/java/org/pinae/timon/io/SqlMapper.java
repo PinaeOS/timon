@@ -35,7 +35,7 @@ public class SqlMapper {
 	private List<SqlObject> sql = new ArrayList<SqlObject>();
 	
 	@Element(name = "procedure")
-	private List<SqlObject> procedure = new ArrayList<SqlObject>();
+	private List<ProcedureObject> procedure = new ArrayList<ProcedureObject>();
 	
 	public String getNamespaces() {
 		return namespaces;
@@ -62,11 +62,11 @@ public class SqlMapper {
 	}
 	
 
-	public List<SqlObject> getProcedure() {
+	public List<ProcedureObject> getProcedure() {
 		return procedure;
 	}
 
-	public void addProcedure(SqlObject procedure) {
+	public void addProcedure(ProcedureObject procedure) {
 		this.procedure.add(procedure);
 	}
 
@@ -183,10 +183,48 @@ public class SqlMapper {
 		}
 		
 	}
+	
+	public class ProcedureObject extends SqlObject {
+		@Element(name = "out")
+		private List<Out> out = new ArrayList<Out>(); // 存储过程输出
+
+		public List<Out> getOut() {
+			return out;
+		}
+
+		public void setOut(List<Out> out) {
+			this.out = out;
+		}
+
+		public class Out {
+			@Attribute(name = "name")
+			private String name; // 输出参数名称
+			
+			@Attribute(name = "type")
+			private String type; // 输出参数类型
+
+			public String getName() {
+				return name;
+			}
+
+			public void setName(String name) {
+				this.name = name;
+			}
+
+			public String getType() {
+				return type;
+			}
+
+			public void setType(String type) {
+				this.type = type;
+			}
+
+		}
+	}
 
 	public class SqlObject {
 		@Attribute(name = "name")
-		private String name; // SQL/存储过程 名称
+		private String name; // SQL(存储过程) 名称
 		
 		@Attribute(name = "prepare")
 		private boolean prepare; // 是否使用预编译SQL
@@ -196,8 +234,6 @@ public class SqlMapper {
 
 		@ElementValue
 		private String value; // SQL语句
-		
-		private boolean procedure; // 是否存储过程
 
 		public String getName() {
 			return name;
@@ -221,14 +257,6 @@ public class SqlMapper {
 
 		public void setChooseList(Choose choose) {
 			this.choose.add(choose);
-		}
-
-		public boolean isProcedure() {
-			return procedure;
-		}
-
-		public void setProcedure(boolean procedure) {
-			this.procedure = procedure;
 		}
 
 		public String getValue() {
