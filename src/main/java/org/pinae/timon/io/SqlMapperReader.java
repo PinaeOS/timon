@@ -3,6 +3,7 @@ package org.pinae.timon.io;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,7 +135,10 @@ public class SqlMapperReader {
 
 		Set<String> keySet = subGlobalVar.keySet();
 
-		List<SqlObject> sqlObjList = mapper.getSql();
+		List<SqlObject> sqlObjList = new ArrayList<SqlObject>();
+		sqlObjList.addAll(mapper.getSql());
+		sqlObjList.addAll(mapper.getProcedure());
+		
 		for (SqlObject sqlObj : sqlObjList) {
 			String sqlName = sqlObj.getName();
 			String query = sqlObj.getValue();

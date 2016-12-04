@@ -34,6 +34,9 @@ public class SqlMapper {
 	@Element(name = "sql")
 	private List<SqlObject> sql = new ArrayList<SqlObject>();
 	
+	@Element(name = "procedure")
+	private List<SqlObject> procedure = new ArrayList<SqlObject>();
+	
 	public String getNamespaces() {
 		return namespaces;
 	}
@@ -56,6 +59,15 @@ public class SqlMapper {
 
 	public void addSql(SqlObject sql) {
 		this.sql.add(sql);
+	}
+	
+
+	public List<SqlObject> getProcedure() {
+		return procedure;
+	}
+
+	public void addProcedure(SqlObject procedure) {
+		this.procedure.add(procedure);
 	}
 
 	public List<Import> getImports() {
@@ -174,7 +186,7 @@ public class SqlMapper {
 
 	public class SqlObject {
 		@Attribute(name = "name")
-		private String name; // SQL名称
+		private String name; // SQL/存储过程 名称
 		
 		@Attribute(name = "prepare")
 		private boolean prepare; // 是否使用预编译SQL
@@ -184,6 +196,8 @@ public class SqlMapper {
 
 		@ElementValue
 		private String value; // SQL语句
+		
+		private boolean procedure; // 是否存储过程
 
 		public String getName() {
 			return name;
@@ -207,6 +221,14 @@ public class SqlMapper {
 
 		public void setChooseList(Choose choose) {
 			this.choose.add(choose);
+		}
+
+		public boolean isProcedure() {
+			return procedure;
+		}
+
+		public void setProcedure(boolean procedure) {
+			this.procedure = procedure;
 		}
 
 		public String getValue() {

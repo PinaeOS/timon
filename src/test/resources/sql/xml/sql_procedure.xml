@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespaces="org.timon.test.procedure">
+	<procedure name="SET_USER">
+		call set_user(:id, :name) 
+	</procedure>
+	
+	<procedure name="GET_USER">
+		call get_user(:name) 
+	</procedure>
+</mapper>
