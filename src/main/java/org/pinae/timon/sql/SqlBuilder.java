@@ -96,7 +96,7 @@ public class SqlBuilder {
 		SqlObject sqlObj = this.sqlMap.get(name);
 		if (sqlObj != null) {
 
-			if (sqlObj.isPrepare() == false || this.envMap.containsKey("prepare") == false || "false".equalsIgnoreCase(this.envMap.get("prepare"))) {
+			if (sqlObj.isPrepare() == false || (this.envMap.containsKey("prepare") == false && "false".equalsIgnoreCase(this.envMap.get("prepare")))) {
 				String sql = replaceSQL(sqlObj, parameterMap);
 				return new Sql(sql, parameterMap);
 			} else {

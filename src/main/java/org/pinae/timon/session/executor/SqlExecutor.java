@@ -145,15 +145,22 @@ public class SqlExecutor extends SqlStatement {
 			return null;
 		}
 		
-		Object[] result = null;
+		List<Object> result = new ArrayList<Object>();
 		
 		Statement stmt = null;
 		try {
 			stmt = this.createStatment(conn, sql);
 			if (stmt instanceof CallableStatement) {
 				CallableStatement callStmt = (CallableStatement)stmt;
-				callStmt.execute(sql.getSql());
-				result = this.getProcedureOutValue(callStmt, sql);
+				callStmt.execute();
+				List<Object> tmpResults = this.getProcedureOutValue(callStmt, sql);
+				for (Object tmpResult : tmpResults) {
+					if (tmpResult instanceof ResultSet) {
+						result.add(getResultSet((ResultSet)tmpResult));
+					} else {
+						result.add(tmpResult);
+					}
+				}
 			}
 		} catch (SQLException e) {
 			throw e;
@@ -169,7 +176,7 @@ public class SqlExecutor extends SqlStatement {
 		
 		logger.debug(String.format("Execute %s used %d ms", sql.getSql(), System.currentTimeMillis() - start));
 		
-		return result;
+		return result.toArray();
 	}
 	
 	/**

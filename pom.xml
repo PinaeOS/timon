@@ -57,14 +57,14 @@
 			<version>1.7.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.pinae</groupId>
-			<artifactId>nala</artifactId>
-			<version>1.6</version>
-		</dependency>
-		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.pinae</groupId>
+			<artifactId>nala</artifactId>
+			<version>1.7</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.jsqlparser</groupId>

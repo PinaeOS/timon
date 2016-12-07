@@ -41,10 +41,8 @@ public abstract class SqlStatement {
 		if (StringUtils.isNotEmpty(sqlBody)) {
 			PreparedStatement stmt = null;
 			if (sql.isProcedure()) {
-				stmt = conn.prepareCall(sqlBody);
-			}
-			
-			if (sql.isPreperStatement()) {
+				stmt = conn.prepareCall("{" + sqlBody + "}");
+			} else if (sql.isPreperStatement()) {
 				stmt = conn.prepareStatement(sqlBody);
 			}
 			
@@ -54,7 +52,7 @@ public abstract class SqlStatement {
 				Set<Integer> indexSet = prepareValues.keySet();
 				for (Integer index : indexSet) {
 					Object value = prepareValues.get(index);
-					if (value != null) {
+					if (index != null && value != null) {
 						if (value instanceof String) {
 							stmt.setString(index, value.toString());
 						} else if (value instanceof Integer) {
@@ -93,8 +91,6 @@ public abstract class SqlStatement {
 						} else {
 							stmt.setObject(index, value);
 						}
-					} else {
-						throw new NullPointerException("Parameter value is NULL, key: " + sql.getKeyByIndex(index));
 					}
 				}
 				return stmt;
@@ -112,6 +108,7 @@ public abstract class SqlStatement {
 			if (outType.equalsIgnoreCase("BIT")) return Types.BIT;
 			if (outType.equalsIgnoreCase("TINYINT")) return Types.TINYINT;
 			if (outType.equalsIgnoreCase("SMALLIN")) return Types.SMALLINT;
+			if (outType.equalsIgnoreCase("INT")) return Types.INTEGER;
 			if (outType.equalsIgnoreCase("INTEGER")) return Types.INTEGER;
 			if (outType.equalsIgnoreCase("BIGINT")) return Types.BIGINT;
 			if (outType.equalsIgnoreCase("FLOAT")) return Types.FLOAT;
@@ -150,7 +147,7 @@ public abstract class SqlStatement {
 		return -999;
 	}
 	
-	public Object[] getProcedureOutValue(CallableStatement stmt, Sql sql) throws SQLException {
+	public List<Object> getProcedureOutValue(CallableStatement stmt, Sql sql) throws SQLException {
 		if (stmt != null) {
 			List<Object> result = new ArrayList<Object>();
 			
@@ -208,9 +205,11 @@ public abstract class SqlStatement {
 				}
 			}
 			
-			return result.toArray();
+			return result;
 		}
 		return null;
 	}
 
 }
+
+

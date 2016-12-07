@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<mapper namespaces="org.timon.test.procedure">
+
+	<procedure name="COUNT_PERSON" prepare="true">
+		call get_person_count(:count)
+		<out name="count" type="int"></out>
+	</procedure>
+	
+	<procedure name="GET_PERSON" prepare="true">
+		call get_person()
+		<out type="resultset"></out>
+	</procedure>
+
+</mapper>

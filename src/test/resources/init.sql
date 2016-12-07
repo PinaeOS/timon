@@ -14,3 +14,13 @@ CREATE TABLE `person` (
   `phone` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+CREATE PROCEDURE `get_person`()
+BEGIN
+	select * from person;
+END
+
+CREATE PROCEDURE `get_person_count`(OUT c int)
+BEGIN
+	SELECT COUNT(*) INTO c FROM person;
+END
