@@ -122,8 +122,6 @@
 	</scm>
 
 	<build>
-		<finalName>timon</finalName>
-
 		<pluginManagement>
 			<plugins>
 
