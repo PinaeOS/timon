@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -119,8 +120,8 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	 * 
 	 * @throws IOException 配置信息IO异常
 	 */
-	public DefaultSqlSessionFactory(ConfigMap<String, String> datasource) throws IOException {
-		this.configMap = datasource;
+	public DefaultSqlSessionFactory(Map<String, String> datasource) throws IOException {
+		this.configMap = new ConfigMap<String, String>(datasource);
 		createInstance();
 	}
 	
