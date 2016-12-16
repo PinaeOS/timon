@@ -37,7 +37,7 @@ public class ProcedureTest {
 		Sql sql = builder.getSQLByName("org.timon.test.procedure.COUNT_PERSON");
 		Object result[] = session.call(sql);
 		if (result != null && result.length > 0) {
-			count = (int)result[0];
+			count = ((Integer)result[0]).intValue();
 		} else {
 			fail("COUNT_PERSON fail");
 		}
