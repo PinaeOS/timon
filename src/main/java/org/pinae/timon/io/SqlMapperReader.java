@@ -37,7 +37,7 @@ public class SqlMapperReader {
 
 	public SqlMapperReader(File file) throws IOException {
 		if (file != null) {
-			loadMapper(file.getAbsolutePath(), file.getName(), null);
+			loadMapper(file.getParent(), file.getName(), null);
 		}
 	}
 
