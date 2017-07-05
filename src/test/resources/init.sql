@@ -5,6 +5,7 @@
  * Date: 2015-08-21
  */
 
+USE `test`;
 DROP TABLE IF EXISTS `person`;
 
 CREATE TABLE `person` (
@@ -15,12 +16,3 @@ CREATE TABLE `person` (
   PRIMARY KEY (`id`)
 );
 
-CREATE PROCEDURE `get_person`()
-BEGIN
-	select * from person;
-END
-
-CREATE PROCEDURE `get_person_count`(OUT c int)
-BEGIN
-	SELECT COUNT(*) INTO c FROM person;
-END

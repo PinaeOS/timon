@@ -193,18 +193,6 @@ public abstract class SqlSessionTest {
 	}
 	
 	@SuppressWarnings("unchecked")
-	@Test
-	public void testGetPrepareSql() throws SQLException {
-		Map<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("id", 1);
-		
-		List<Person> table = (List<Person>) session.select(builder.getSQLByNameWithParameters("GET_PERSON_3", parameters), Person.class);
-		
-		assertEquals(table.size(), 1); // 用户数量测试
-		assertEquals(table.get(0).getId(), 1); // 用户编号测试
-	}
-	
-	@SuppressWarnings("unchecked")
 	// @Test
 	public void testCache() throws InterruptedException, SQLException {
 		/* 
