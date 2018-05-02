@@ -325,10 +325,25 @@ public class SqlBuilder {
 								}
 							}
 							value = StringUtils.removeEnd(valueBuffer.toString(), ",");
-						} else if (value == null) {
-							continue;
+						} else if (value instanceof Map) {
+							StringBuffer valueBuffer = new StringBuffer();
+							
+							Map<?, ?> map = (Map<?, ?>) value;
+							Set<?> valKeySet = map.keySet();
+							for (Object valKey : valKeySet) {
+								Object val = map.get(valKey);
+								if (val instanceof String) {
+									valueBuffer.append(String.format("%s='%s'", valKey.toString(), val.toString()) + ",");
+								} else {
+									valueBuffer.append(String.format("%s=%s", valKey.toString(), val.toString()) + ",");
+								}
+							}
+							
+							value = StringUtils.removeEnd(valueBuffer.toString(), ",");
 						} else if (value instanceof Date) {
 							value = String.format("'%s'", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date) value));
+						} else if (value == null) {
+							continue;
 						} else {
 							value = value.toString();
 						}

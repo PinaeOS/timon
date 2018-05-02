@@ -21,7 +21,7 @@
 			and id = :id
 		</choose>
 		<choose when="name">
-			and name = :name
+			and name like :name
 		</choose>
 		<choose when="id" block="order">
 			order by id

@@ -33,7 +33,7 @@
                     "when": "id"
                 }, 
                 {
-                    "value": "and name = :name", 
+                    "value": "and name like :name", 
                     "when": "name"
                 }, 
                 {
