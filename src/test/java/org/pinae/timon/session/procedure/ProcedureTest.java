@@ -13,6 +13,7 @@ import org.pinae.timon.session.SqlSessionFactory;
 import org.pinae.timon.session.defaults.DefaultSqlSessionFactory;
 import org.pinae.timon.sql.Sql;
 import org.pinae.timon.sql.SqlBuilder;
+import org.pinae.timon.util.FileUtils;
 
 public class ProcedureTest {
 	private SqlBuilder builder = null;
@@ -20,7 +21,7 @@ public class ProcedureTest {
 	
 	public ProcedureTest() {
 		try {
-			this.builder = new SqlBuilder("sql/xml/sql_procedure_test.xml");
+			this.builder = new SqlBuilder(FileUtils.getFile("sql/xml/sql_procedure_test.xml"));
 			this.sessionFactory = new DefaultSqlSessionFactory();
 		} catch (IOException e) {
 			fail(e.getMessage());

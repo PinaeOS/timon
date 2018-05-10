@@ -21,6 +21,7 @@ import org.pinae.timon.session.pojo.AnnotationPerson;
 import org.pinae.timon.session.pojo.Person;
 import org.pinae.timon.sql.Sql;
 import org.pinae.timon.sql.SqlBuilder;
+import org.pinae.timon.util.FileUtils;
 
 public abstract class SqlSessionTest {
 	
@@ -33,7 +34,7 @@ public abstract class SqlSessionTest {
 	
 	static {
 		try {
-			builder = new SqlBuilder("sql.xml");
+			builder = new SqlBuilder(FileUtils.getFile("sql.xml"));
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

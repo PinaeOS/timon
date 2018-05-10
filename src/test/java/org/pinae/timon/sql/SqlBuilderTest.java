@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pinae.timon.session.pojo.Person;
 import org.pinae.timon.sql.SqlBuilder;
+import org.pinae.timon.util.FileUtils;
 
 
 public class SqlBuilderTest {
@@ -21,7 +22,7 @@ public class SqlBuilderTest {
 	@Before
 	public void before() {
 		try {
-			this.builder = new SqlBuilder("sql.xml");
+			this.builder = new SqlBuilder(FileUtils.getFile("sql.xml"));
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

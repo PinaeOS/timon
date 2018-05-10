@@ -2,6 +2,7 @@ package org.pinae.timon.sql;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,17 +14,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pinae.timon.io.SqlMapper.ProcedureObject;
-import org.pinae.timon.io.SqlMapper.ProcedureObject.Out;
-import org.pinae.timon.io.SqlMapper.SqlObject;
-import org.pinae.timon.io.SqlMapper.SqlObject.Choose;
-import org.pinae.timon.io.SqlMapperReader;
-import org.pinae.timon.io.SqlScriptReader;
-import org.pinae.timon.util.ClassLoaderUtils;
+import org.pinae.timon.sql.SqlMapper.ProcedureObject;
+import org.pinae.timon.sql.SqlMapper.SqlObject;
+import org.pinae.timon.sql.SqlMapper.ProcedureObject.Out;
+import org.pinae.timon.sql.SqlMapper.SqlObject.Choose;
+import org.pinae.timon.sql.io.SqlMapperReader;
+import org.pinae.timon.sql.io.SqlScriptReader;
+import org.pinae.timon.util.FileUtils;
 
 /**
  * 
- * 从XML配置中获得SQL语句
+ * 从SQL配置文件中载入SQL语句
  * 
  * @author huiyugeng
  * 
@@ -34,24 +35,16 @@ public class SqlBuilder {
 	private Map<String, String> scriptMap = new HashMap<String, String>();
 	private Map<String, String> envMap = new HashMap<String, String>();
 
-	private String path;
-
 	public SqlBuilder() {
 
 	}
 
 	public SqlBuilder(File file) throws IOException {
 		this(new SqlMapperReader(file));
-		this.path = file.getAbsolutePath();
 	}
-
-	public SqlBuilder(String filename) throws IOException {
-		this(ClassLoaderUtils.getResourcePath(""), filename);
-	}
-
-	public SqlBuilder(String path, String filename) throws IOException {
-		this(new SqlMapperReader(path, filename));
-		this.path = path;
+	
+	public SqlBuilder(String filename, InputStream inputStream) throws IOException {
+		this(new SqlMapperReader(filename, inputStream));
 	}
 
 	private SqlBuilder(SqlMapperReader reader) {
@@ -349,29 +342,32 @@ public class SqlBuilder {
 
 		return query;
 	}
-
+	
 	/**
 	 * 获得SQL脚本中SQL语句列表
 	 * 
-	 * @param name SQL脚本名称
+	 * @param scriptName SQL脚本名称
 	 * 
 	 * @return SQL语句列表
 	 */
-	public List<String> getScript(String name) {
-		return getScript(name, "UTF8");
+	public List<String> getScript(String scriptName) {
+		String scriptFilename = this.scriptMap.get(scriptName);
+		InputStream scriptFileStream = FileUtils.getFileInputStream(scriptFilename);
+		
+		List<String> sqlList = new SqlScriptReader().getSQLList(scriptFileStream);
+
+		return sqlList;
 	}
 
 	/**
 	 * 获得SQL脚本中SQL语句列表
 	 * 
-	 * @param name SQL脚本名称
-	 * @param encoding SQL脚本编码
+	 * @param scriptFileStream SQL脚本文件流
 	 * 
 	 * @return SQL语句列表
 	 */
-	public List<String> getScript(String name, String encoding) {
-		String filename = this.scriptMap.get(name);
-		List<String> sqlList = new SqlScriptReader().getSQLList(this.path + File.separator + filename, encoding);
+	public List<String> getScript(InputStream scriptFileStream) {
+		List<String> sqlList = new SqlScriptReader().getSQLList(scriptFileStream);
 
 		return sqlList;
 	}
