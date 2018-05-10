@@ -51,7 +51,7 @@ public class SqlBuilderTest {
 		
 		parameters.put("name", "Hui");
 		sql = builder.getSQLByNameWithParameters("org.timon.test.builder.GET_PERSON_2", parameters);
-		assertEquals(sql.getSql(), "select * from person where 1=1 and name = 'Hui' and id = 20 order by id");
+		assertEquals(sql.getSql(), "select * from person where 1=1 and name like 'Hui' and id = 20 order by id");
 	}
 	
 	@Test

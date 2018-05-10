@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pinae.timon.sql.SqlMapper.ProcedureObject;
-import org.pinae.timon.sql.SqlMapper.SqlObject;
 import org.pinae.timon.sql.SqlMapper.ProcedureObject.Out;
+import org.pinae.timon.sql.SqlMapper.SqlObject;
 import org.pinae.timon.sql.SqlMapper.SqlObject.Choose;
 import org.pinae.timon.sql.io.SqlMapperReader;
 import org.pinae.timon.sql.io.SqlScriptReader;
