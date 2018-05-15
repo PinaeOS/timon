@@ -35,7 +35,7 @@ public class SqlMapperReader {
 
 	private Map<String, SqlObject> sqlMap = new HashMap<String, SqlObject>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
-	private Map<String, String> envMap = new HashMap<String, String>();
+	private Map<String, String> varMap = new HashMap<String, String>();
 
 	public SqlMapperReader(File file) throws IOException {
 		if (file != null) {
@@ -72,8 +72,8 @@ public class SqlMapperReader {
 	 * 
 	 * @return 环境变量键值
 	 */
-	public Map<String, String> getEnvMap() {
-		return this.envMap;
+	public Map<String, String> getVarMap() {
+		return this.varMap;
 	}
 	
 	private void loadMapper(String filename, InputStream sqlMapperInputSteam, Map<String, String> globalVar) throws IOException {
@@ -115,21 +115,21 @@ public class SqlMapperReader {
 		}
 	}
 
-	private void build(SqlMapper sqlMapper, Map<String, String> globalVar) throws IOException {
+	private void build(SqlMapper sqlMapper, Map<String, String> globalVarMap) throws IOException {
 		Map<String, String> subGlobalVar = new HashMap<String, String>();
-		if (globalVar != null) {
-			subGlobalVar.putAll(globalVar);
+		if (globalVarMap != null) {
+			subGlobalVar.putAll(globalVarMap);
 		}
 		// 载入命名空间
 		String namespace = sqlMapper.getNamespaces();
 
 		// 载入全局变量
-		List<GlobalVar> globals = sqlMapper.getGlobal();
-		for (GlobalVar global : globals) {
-			subGlobalVar.put(global.getKey(), global.getValue());
+		List<GlobalVar> globalVarList = sqlMapper.getGlobal();
+		for (GlobalVar globalVar : globalVarList) {
+			subGlobalVar.put(globalVar.getKey(), globalVar.getValue());
 		}
 
-		Set<String> keySet = subGlobalVar.keySet();
+		Set<String> varKeySet = subGlobalVar.keySet();
 
 		List<SqlObject> sqlObjList = new ArrayList<SqlObject>();
 		sqlObjList.addAll(sqlMapper.getSql());
@@ -137,24 +137,24 @@ public class SqlMapperReader {
 		
 		for (SqlObject sqlObj : sqlObjList) {
 			String sqlName = sqlObj.getName();
-			String query = sqlObj.getValue();
+			String sqlQuery = sqlObj.getValue();
 
 			if (StringUtils.isBlank(sqlName)) {
 				continue;
 			}
 
-			if (query != null) {
-				for (String key : keySet) {
+			if (sqlQuery != null) {
+				for (String varKey : varKeySet) {
 					// 全局变量替换
-					if (StringUtils.isNotBlank(key)) {
-						String varName = ":" + key;
-						if (query.contains(varName)) {
-							String value = subGlobalVar.get(key);
-							query = query.replaceAll(varName, value);
+					if (StringUtils.isNotBlank(varKey)) {
+						String varName = ":" + varKey;
+						if (sqlQuery.contains(varName)) {
+							String varValue = subGlobalVar.get(varKey);
+							sqlQuery = sqlQuery.replaceAll(varName, varValue);
 						}
 					}
 				}
-				sqlObj.setValue(query);
+				sqlObj.setValue(sqlQuery);
 			}
 
 			// 使用命名空间构建SQL名称
@@ -162,7 +162,7 @@ public class SqlMapperReader {
 				sqlName = namespace.trim() + "." + sqlName;
 			}
 
-			sqlObj.setValue(query);
+			sqlObj.setValue(sqlQuery);
 			this.sqlMap.put(sqlName, sqlObj);
 
 		}
@@ -188,7 +188,7 @@ public class SqlMapperReader {
 		// 载入环境变量
 		List<Env> envList = sqlMapper.getEnv();
 		for (Env env : envList) {
-			this.envMap.put(env.getKey(), env.getValue());
+			this.varMap.put(env.getKey(), env.getValue());
 		}
 
 	}

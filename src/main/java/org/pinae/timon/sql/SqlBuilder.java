@@ -33,7 +33,7 @@ public class SqlBuilder {
 
 	private Map<String, SqlObject> sqlMap = new HashMap<String, SqlObject>();
 	private Map<String, String> scriptMap = new HashMap<String, String>();
-	private Map<String, String> envMap = new HashMap<String, String>();
+	private Map<String, String> varMap = new HashMap<String, String>();
 
 	public SqlBuilder() {
 
@@ -50,13 +50,13 @@ public class SqlBuilder {
 	private SqlBuilder(SqlMapperReader reader) {
 		this.sqlMap = reader.getSQLMap();
 		this.scriptMap = reader.getScriptMap();
-		this.envMap = reader.getEnvMap();
+		this.varMap = reader.getVarMap();
 	}
 
-	public SqlBuilder(Map<String, SqlObject> sqlMap, Map<String, String> scriptMap, Map<String, String> envMap) {
+	public SqlBuilder(Map<String, SqlObject> sqlMap, Map<String, String> scriptMap, Map<String, String> varMap) {
 		this.sqlMap = sqlMap;
 		this.scriptMap = scriptMap;
-		this.envMap = envMap;
+		this.varMap = varMap;
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class SqlBuilder {
 		SqlObject sqlObj = this.sqlMap.get(name);
 		if (sqlObj != null) {
 
-			if (sqlObj.isPrepare() == false || (this.envMap.containsKey("prepare") == false && "false".equalsIgnoreCase(this.envMap.get("prepare")))) {
+			if (sqlObj.isPrepare() == false || (this.varMap.containsKey("prepare") == false && "false".equalsIgnoreCase(this.varMap.get("prepare")))) {
 				String sql = replaceSQL(sqlObj, parameterMap);
 				return new Sql(sql, parameterMap);
 			} else {

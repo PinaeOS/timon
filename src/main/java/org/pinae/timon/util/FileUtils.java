@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +51,15 @@ public class FileUtils {
 
 		URL resUrl = FileUtils.class.getClassLoader().getResource(filename);
 		if (resUrl != null) {
-			if (file != null) {
-				return file;
+			try {
+				file = new File(resUrl.toURI());
+				if (file != null) {
+					return file;
+				}
+			} catch (URISyntaxException e) {
+
 			}
+			
 		}
 
 		return null;

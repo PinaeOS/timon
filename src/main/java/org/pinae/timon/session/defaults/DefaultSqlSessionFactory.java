@@ -20,8 +20,8 @@ import org.pinae.timon.session.datasource.DBCPDataSource;
 import org.pinae.timon.session.datasource.DataSource;
 import org.pinae.timon.session.datasource.JDBCDataSource;
 import org.pinae.timon.session.handle.ConnectionHandler;
-import org.pinae.timon.util.ClassLoaderUtils;
 import org.pinae.timon.util.ConfigMap;
+import org.pinae.timon.util.FileUtils;
 
 /**
  * 数据库会话工厂
@@ -49,7 +49,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	private ConfigMap<String, String> configMap = new ConfigMap<String, String>();
 
 	public DefaultSqlSessionFactory() throws IOException {
-		this(ClassLoaderUtils.getResourcePath("") + "database.properties");
+		this(FileUtils.getFile("database.properties"));
 	}
 
 	/**
@@ -61,7 +61,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	 */
 	public DefaultSqlSessionFactory(File file) throws IOException {
 		if (file == null) {
-			throw new NullPointerException("file is NULL");
+			throw new NullPointerException("Database Properties File is Null");
 		}
 		this.configMap = ConfigMap.load(file);
 		createInstance();
@@ -70,21 +70,20 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 	/**
 	 * 构造函数
 	 * 
-	 * @param filename 配置文件路径
+	 * @param dbPropFilename 配置文件路径
 	 * 
 	 * @throws IOException 配置文件IO异常
 	 */
-	public DefaultSqlSessionFactory(String filename) throws IOException {
-		if (StringUtils.isBlank(filename)) {
-			throw new NullPointerException("filename is NULL");
+	public DefaultSqlSessionFactory(String dbPropFilename) throws IOException {
+		if (StringUtils.isBlank(dbPropFilename)) {
+			throw new NullPointerException("Database Properties File is Null");
 		}
 
-		filename = getFilePath(filename);
-		if (filename != null) {
-			this.configMap = ConfigMap.load(filename);
+		if (dbPropFilename != null) {
+			this.configMap = ConfigMap.load(FileUtils.getFile(dbPropFilename));
 			createInstance();
 		} else {
-			throw new IOException("No such file : " + filename);
+			throw new IOException("No Such File : " + dbPropFilename);
 		}
 	}
 
@@ -144,16 +143,15 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 
 	private void createCache() throws IOException {
 
-		String path = ClassLoaderUtils.getResourcePath("");
-		String cacheConfigFile = path + "cache.properties";
+		String cacheConfigFilename = "cache.properties";
 
 		if (this.configMap.containsKey("sql.cache.config")) {
-			cacheConfigFile = this.configMap.get("sql.cache.config");
+			cacheConfigFilename = this.configMap.get("sql.cache.config");
 		}
 
-		cacheConfigFile = getFilePath(cacheConfigFile);
+		File cacheConfigFile = FileUtils.getFile(cacheConfigFilename);
 		if (cacheConfigFile != null) {
-			ConfigMap<String, String> cacheConfigMap = ConfigMap.load(new File(cacheConfigFile));
+			ConfigMap<String, String> cacheConfigMap = ConfigMap.load(cacheConfigFile);
 			CacheConfiguration cacheConfig = CacheConfiguration.build(cacheConfigMap);
 
 			try {
@@ -246,27 +244,5 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
 		return null;
 	}
 
-	/*
-	 * 获取文件全路径, 如果仅包含文件名则在本地执行目录下寻找同名文件
-	 * 
-	 * @param filename 文件名(路径)
-	 * 
-	 * @return 文件全路径, 如果无法找到文件则为null
-	 */
-	private String getFilePath(String filename) {
-		if (filename != null) {
-			File file = new File(filename);
-			if (file.exists() && file.isFile()) {
-				return filename;
-			} else {
-				filename = ClassLoaderUtils.getResourcePath("") + filename;
-				file = new File(filename);
-				if (file.exists() && file.isFile()) {
-					return filename;
-				}
-			}
-		}
-		return null;
-	}
 
 }
