@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,10 +52,10 @@ public class FileUtils {
 		if (resUrl != null) {
 			try {
 				file = new File(resUrl.toURI());
-				if (file != null) {
+				if (file != null && file.exists() && file.isFile()) {
 					return file;
 				}
-			} catch (URISyntaxException e) {
+			} catch (Exception e) {
 
 			}
 			
