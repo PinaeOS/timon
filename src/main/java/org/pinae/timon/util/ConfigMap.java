@@ -35,6 +35,30 @@ public class ConfigMap<K, V> extends HashMap<K, V> {
 	public ConfigMap(Map<? extends K, ? extends V> map) {
 		super(map);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public ConfigMap(Object object) {
+		if (object != null) {
+			if (object instanceof Map) {
+				try {
+					putAll((Map<? extends K, ? extends V>) object);
+				} catch (Exception e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
+		}
+	}
+	
+	public ConfigMap<K, V> getMap(K key) {
+		if (containsKey(key)) {
+			V v = get(key);
+			if (v instanceof Map) {
+				ConfigMap<K, V> subMap = new ConfigMap<K, V>(v);
+				return subMap;
+			}
+		}
+		return null;
+	}
 
 	public String getString(K key, String defaultValue) {
 		V v = get(key);
