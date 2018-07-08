@@ -42,7 +42,7 @@ public class SqlExecutor extends SqlStatement {
 	 * 
 	 * @return 查询结果列表
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public List<Object[]> select(Sql sql) throws SQLException {
 		
@@ -93,7 +93,7 @@ public class SqlExecutor extends SqlStatement {
 	 * 
 	 * @return 是否执行成功
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public boolean execute(Sql sql) throws SQLException {
 		
@@ -135,7 +135,7 @@ public class SqlExecutor extends SqlStatement {
 	 * 
 	 * @return 存储过程执行结果
 	 * 
-	 * @throws SQLException
+	 * @throws SQLException SQL执行异常
 	 */
 	public Object[] call(Sql sql) throws SQLException {
 		
@@ -187,7 +187,7 @@ public class SqlExecutor extends SqlStatement {
 	 * 
 	 * @return 批量执行结果
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public int[] execute(Iterable<String> sqls, int batchSize) throws SQLException {
 		if (sqls == null) {
@@ -235,18 +235,18 @@ public class SqlExecutor extends SqlStatement {
 	}
 	
 	/**
-	 * SQL事务: 提交
+	 * SQL事务提交
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public void commit() throws SQLException {
 		conn.commit();
 	}
 
 	/**
-	 * SQL事务: 回滚
+	 * SQL事务回滚
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public void rollback() throws SQLException {
 		conn.rollback();
@@ -255,7 +255,7 @@ public class SqlExecutor extends SqlStatement {
 	/**
 	 * 关闭数据库连接
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public void close() throws SQLException {
 		conn.close();
@@ -266,7 +266,7 @@ public class SqlExecutor extends SqlStatement {
 	 * 
 	 * @return 数据库是否关闭
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public boolean isClosed() throws SQLException {
 		if (conn != null) {

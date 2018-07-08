@@ -31,7 +31,7 @@ public class SqlMetadata extends SqlStatement {
 	 * 
 	 * @return 元数据信息
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public List<Map<String, String>> getMetadataBySql(Sql sql) throws SQLException {
 		
@@ -66,7 +66,7 @@ public class SqlMetadata extends SqlStatement {
 	 * 
 	 * @return 列名
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public String[] getColumnsBySql(Sql sql) throws SQLException {
 		String columns[] = null;
@@ -93,7 +93,7 @@ public class SqlMetadata extends SqlStatement {
 	 * 
 	 * @return 元数据信息
 	 * 
-	 * @throws SQLException 
+	 * @throws SQLException SQL执行异常
 	 */
 	public List<Map<String, String>> getMetadataByTable(String schema, String tableName) throws SQLException {
 		
