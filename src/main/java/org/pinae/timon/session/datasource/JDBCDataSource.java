@@ -32,8 +32,11 @@ public class JDBCDataSource implements DataSource {
 		Connection conn = null;
 		try {
 			if (this.datasource != null) {
-				Class.forName(datasource.get("driver"));
-				
+				try {
+					Class.forName(datasource.get("driver"));
+				} catch (ClassNotFoundException e) {
+					throw new IOException("Load jdbc driver fail: " + datasource.get("driver"));
+				}
 				String url = datasource.get("url");
 				String user = datasource.get("user");
 				String password = datasource.get("password");

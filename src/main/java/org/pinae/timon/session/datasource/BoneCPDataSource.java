@@ -20,6 +20,12 @@ public class BoneCPDataSource implements DataSource {
 	private BoneCP datasource = null;
 	
 	public BoneCPDataSource(ConfigMap<String, String> datasource) throws IOException {
+		try {
+			Class.forName(datasource.get("driver"));
+		} catch (ClassNotFoundException e) {
+			throw new IOException("Load jdbc driver fail" + datasource.get("driver"));
+		}
+		
 		BoneCPConfig config = new BoneCPConfig();
 		config.setJdbcUrl(datasource.get("url"));
 		config.setUsername(datasource.get("user")); 
