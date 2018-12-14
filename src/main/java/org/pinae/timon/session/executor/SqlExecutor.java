@@ -105,10 +105,10 @@ public class SqlExecutor extends SqlStatement {
 		
 		boolean result = false;
 		
-		Statement stmt = null;
+		PreparedStatement stmt = null;
 		try {
 			stmt = this.createStatment(conn, sql);
-			stmt.execute(sql.getSql());
+			stmt.execute();
 			
 			result = true;
 		} catch (SQLException e) {
